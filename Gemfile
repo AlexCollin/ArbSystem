@@ -33,6 +33,9 @@ gem 'jbuilder', '~> 2.5'
 # gem 'bcrypt', '~> 3.1.7'
 gem 'json'
 gem 'daemons-rails'
+gem 'inherited_resources', '~> 1.7'
+gem 'activeadmin', github: 'activeadmin'
+gem 'devise'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
