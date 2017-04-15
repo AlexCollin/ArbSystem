@@ -28,9 +28,7 @@ class Tracker::ClickController < Tracker::TrackerController
       @click.s9 = params[:s9]
     end
     @click.save
-    if stale?(last_modified: @click.created_at, public: true)
-      render json: @click
-    end
+    render json: @click
   end
 
 end
