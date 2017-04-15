@@ -1,0 +1,2 @@
+module Tracker::ClickHelper
+end
