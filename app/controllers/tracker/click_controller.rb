@@ -7,8 +7,9 @@ class Tracker::ClickController < Tracker::TrackerController
             params[:s7].to_s+params[:s9].to_s+params[:s9].to_s)
 
     @click = Click.where(:ident => client_ident).order('created_at DESC').first
-    if @click and @click.created_at > 1.day.ago
+    if @click and @click.created_at >= 1.day.ago
       @click.amount += 1
+      @click.updated_at = Time.now
     else
       @click = Click.new
       @click.ip = params[:ip]
