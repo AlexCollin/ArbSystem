@@ -2,7 +2,7 @@ require 'net/http'
 require 'uri'
 
 class Postbacks::TLightJob < ApplicationJob
-  queue_as :postbacks
+  queue_as :default_priority
   def perform(*args)
     conversion = args[0][:conversion]
     params = {

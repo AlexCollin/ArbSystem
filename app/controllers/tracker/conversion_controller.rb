@@ -8,6 +8,11 @@ class Tracker::ConversionController < Tracker::TrackerController
     @conversion.client_comment = params[:comment]
     @conversion.extra = params[:extra]
     @conversion.status = 0
+    if params[:approve]
+      @conversion.status = 1
+    elsif params[:decline]
+      @conversion.status = 2
+    end
     @conversion.save
     if stale?(last_modified: @conversion.created_at, public: true)
       render json: @conversion

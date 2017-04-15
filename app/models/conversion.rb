@@ -5,8 +5,10 @@ class Conversion < ApplicationRecord
 
   private
   def send_postback
-    unless self.ext_id and self.status == 0
-      Postbacks::TLightJob.set(queue: :postbacks).perform_later(:conversion => self)
+    if self.status == 0
+      unless self.ext_id
+        Postbacks::TLightJob.perform_now(:conversion => self)
+      end
     end
   end
 end

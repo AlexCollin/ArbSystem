@@ -8,6 +8,7 @@ Bundler.require(*Rails.groups)
 module Arbitrage
   class Application < Rails::Application
     config.cache_store = :memory_store, {size: 64.megabytes}
+    config.autoload_paths << config.root.join('lib')
 
     # controller = Daemons::Rails::Monitoring.controller('poller.rb')
     # if controller.status != :running
