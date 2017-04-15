@@ -14,8 +14,6 @@ class Tracker::ConversionController < Tracker::TrackerController
       @conversion.status = 2
     end
     @conversion.save
-    if stale?(last_modified: @conversion.created_at, public: true)
-      render json: @conversion
-    end
+    render json: @conversion
   end
 end
