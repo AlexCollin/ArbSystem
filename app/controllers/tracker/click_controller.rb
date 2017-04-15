@@ -15,7 +15,7 @@ class Tracker::ClickController < Tracker::TrackerController
       @click.ua = params[:ua]
       @click.ident = client_ident
       @click.referer = params[:referer]
-      @click.cpc = params[:cpc]
+      @click.cpc = params[:cpc].to_f.round(2)
       @click.amount = 1
       @click.s1 = params[:s1]
       @click.s2 = params[:s2]

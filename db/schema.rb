@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170415030616) do
+ActiveRecord::Schema.define(version: 20170415192245) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -51,7 +51,7 @@ ActiveRecord::Schema.define(version: 20170415030616) do
     t.string   "ua"
     t.string   "ident"
     t.text     "referer"
-    t.integer  "cpc"
+    t.float    "cpc"
     t.integer  "amount"
     t.string   "s1"
     t.string   "s2"
