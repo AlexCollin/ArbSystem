@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170415192245) do
+ActiveRecord::Schema.define(version: 20170416122605) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,7 +47,7 @@ ActiveRecord::Schema.define(version: 20170415192245) do
   end
 
   create_table "clicks", force: :cascade do |t|
-    t.inet     "ip"
+    t.string   "ip"
     t.string   "ua"
     t.string   "ident"
     t.text     "referer"

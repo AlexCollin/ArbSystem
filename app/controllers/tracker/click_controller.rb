@@ -18,15 +18,15 @@ class Tracker::ClickController < Tracker::TrackerController
       @click.referer = params[:referer]
       @click.cpc = params[:cpc].to_f.round(2)
       @click.amount = 1
-      @click.s1 = params[:s1]
-      @click.s2 = params[:s2]
-      @click.s3 = params[:s3]
-      @click.s4 = params[:s4]
-      @click.s5 = params[:s5]
-      @click.s6 = params[:s6]
-      @click.s7 = params[:s7]
-      @click.s8 = params[:s8]
-      @click.s9 = params[:s9]
+      @click.s1 = params[:s1] if params[:s1]
+      @click.s2 = params[:s2] if params[:s2]
+      @click.s3 = params[:s3] if params[:s3]
+      @click.s4 = params[:s4] if params[:s4]
+      @click.s5 = params[:s5] if params[:s5]
+      @click.s6 = params[:s6] if params[:s6]
+      @click.s7 = params[:s7] if params[:s7]
+      @click.s8 = params[:s8] if params[:s8]
+      @click.s9 = params[:s9] if params[:s9]
     end
     @click.save
     render json: @click
