@@ -36,6 +36,7 @@ gem 'daemons-rails'
 gem 'inherited_resources', '~> 1.7'
 gem 'activeadmin', github: 'activeadmin'
 gem 'devise'
+gem 'russian'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 

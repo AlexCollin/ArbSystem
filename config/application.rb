@@ -9,7 +9,8 @@ module Arbitrage
   class Application < Rails::Application
     config.cache_store = :memory_store, {size: 64.megabytes}
     config.autoload_paths << config.root.join('lib')
-
+    config.time_zone = 'Europe/Moscow'
+    config.i18n.default_locale = :ru
     # controller = Daemons::Rails::Monitoring.controller('poller.rb')
     # if controller.status != :running
     #   controller.start

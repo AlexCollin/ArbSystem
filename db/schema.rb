@@ -47,7 +47,7 @@ ActiveRecord::Schema.define(version: 20170416122605) do
   end
 
   create_table "clicks", force: :cascade do |t|
-    t.string   "ip"
+    t.inet     "ip"
     t.string   "ua"
     t.string   "ident"
     t.text     "referer"
@@ -62,9 +62,8 @@ ActiveRecord::Schema.define(version: 20170416122605) do
     t.string   "s7"
     t.string   "s8"
     t.string   "s9"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["ident"], name: "index_clicks_on_ident", using: :btree
+    t.datetime "created_at", precision: 6
+    t.datetime "updated_at", precision: 6
   end
 
   create_table "conversions", force: :cascade do |t|
