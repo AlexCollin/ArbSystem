@@ -14,7 +14,7 @@ class Postbacks::TLightJob < ApplicationJob
         :country => 'RU',
         :landing_currency => 'RUB',
         :landing_cost => conversion.extra['Ценник'].to_i,
-        :ip_address => conversion.click&.ip.to_s,
+        :ip_address => conversion.visitor&.ip.to_s,
         :comments => conversion.extra['Артикул'].to_s + ' ' + conversion.extra['Категория'].to_s
     }
     response = Net::HTTP.post_form(URI.parse('http://cpa.tlight.biz/api/lead/send'), params)
@@ -24,7 +24,6 @@ class Postbacks::TLightJob < ApplicationJob
       if id.strip.size > 0
         conversion.ext_id = id
         conversion.save
-        p 'PostBack: TLight - ' + id
       end
     end
   end

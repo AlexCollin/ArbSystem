@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170416122605) do
+ActiveRecord::Schema.define(version: 20170421140437) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,9 +47,6 @@ ActiveRecord::Schema.define(version: 20170416122605) do
   end
 
   create_table "clicks", force: :cascade do |t|
-    t.inet     "ip"
-    t.string   "ua"
-    t.string   "ident"
     t.text     "referer"
     t.float    "cpc"
     t.integer  "amount"
@@ -64,6 +61,8 @@ ActiveRecord::Schema.define(version: 20170416122605) do
     t.string   "s9"
     t.datetime "created_at", precision: 6
     t.datetime "updated_at", precision: 6
+    t.integer  "visitor_id"
+    t.index ["visitor_id"], name: "index_clicks_on_visitor_id", using: :btree
   end
 
   create_table "conversions", force: :cascade do |t|
@@ -79,7 +78,17 @@ ActiveRecord::Schema.define(version: 20170416122605) do
     t.string   "ext_payout"
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
+    t.integer  "visitor_id"
     t.index ["click_id"], name: "index_conversions_on_click_id", using: :btree
+    t.index ["visitor_id"], name: "index_conversions_on_visitor_id", using: :btree
+  end
+
+  create_table "visitors", force: :cascade do |t|
+    t.inet     "ip"
+    t.string   "ua"
+    t.string   "ident"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
 end

@@ -37,6 +37,10 @@ gem 'inherited_resources', '~> 1.7'
 gem 'activeadmin', github: 'activeadmin'
 gem 'devise'
 gem 'russian'
+gem 'redis'
+gem 'redis-namespace'
+gem 'redis-rails'
+gem 'redis-rack-cache'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 

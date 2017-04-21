@@ -1,5 +1,6 @@
 class Conversion < ApplicationRecord
   belongs_to :click
+  belongs_to :visitor
 
   after_save :send_postback
 
