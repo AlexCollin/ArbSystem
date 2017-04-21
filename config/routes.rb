@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   root to: 'default#index'
   namespace :tracker do
     post '/click', to: 'click#create'
+    post '/click/page-load', to: 'click#page_load'
     post '/conversion', to: 'conversion#create'
   end
 end
