@@ -77,7 +77,7 @@ ActiveAdmin.register Click, as: 'SubAccount' do
 
   controller do
     def scoped_collection
-      Click.left_joins(:conversions)
+      Click.left_outer_joins(:conversions)
           .select(
               'sum(case when clicks.amount > 0 then 1 else 0 end) clicks',
               'sum(case when clicks.amount > 0 then clicks.amount else 0 end) hits',

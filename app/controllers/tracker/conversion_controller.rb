@@ -6,7 +6,12 @@ class Tracker::ConversionController < Tracker::TrackerController
     @conversion = Conversion.new
     @conversion.visitor_id = visitor
     if hit
-      @conversion.click_id = hit.to_i
+      @conversion.click_id = hit.to_is
+    elsif params[:click]
+      click_model = Click.find(params[:click].to_i)
+      if click_model
+        @conversion.click_id = click_model.id
+      end
     end
     @conversion.client_name = params[:name]
     @conversion.client_phone = params[:phone]
