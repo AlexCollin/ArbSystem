@@ -6,7 +6,7 @@ class Tracker::ConversionController < Tracker::TrackerController
     @conversion = Conversion.new
     @conversion.visitor_id = visitor
     if hit
-      @conversion.click_id = hit.to_is
+      @conversion.click_id = hit.to_i
     elsif params[:click]
       click_model = Click.find(params[:click].to_i)
       if click_model
