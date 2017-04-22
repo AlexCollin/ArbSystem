@@ -45,6 +45,7 @@ ActiveAdmin.register Click, as: 'SubAccount' do
     end
     column scope
     column :clicks
+    column :actives
     column :hits
     column 'CR' do |row|
       all = row.wait + row.approve + row.decline
@@ -80,6 +81,7 @@ ActiveAdmin.register Click, as: 'SubAccount' do
       Click.left_outer_joins(:conversions)
           .select(
               'sum(case when clicks.amount > 0 then 1 else 0 end) clicks',
+              'sum(case when clicks.activity::int > 0 then 1 else 0 end) actives',
               'sum(case when clicks.amount > 0 then clicks.amount else 0 end) hits',
               'sum(case when conversions.status = 0 then 1 else 0 end) wait',
               'sum(case when conversions.status = 1 then 1 else 0 end) approve',
