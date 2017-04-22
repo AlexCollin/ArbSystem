@@ -30,15 +30,17 @@ class Tracker::ClickController < Tracker::TrackerController
     render json: click
   end
 
-  def page_load()
+  def activity
     visitor = Visitor::get(params[:ip], params[:ua])
     hit_ident = visitor.to_s + params[:ident].to_s
     hit = $hits_cache.get(hit_ident)
     if hit
       click = Click.find(hit.to_i)
-      click.is_load_js = true
-      click.save
-      render json: click
+      if click
+        click.activity = click.activity + 1
+        click.save
+        render json: click
+      end
     end
   end
 end
