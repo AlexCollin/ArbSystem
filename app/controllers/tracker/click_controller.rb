@@ -37,7 +37,7 @@ class Tracker::ClickController < Tracker::TrackerController
     if hit
       click = Click.find(hit.to_i)
       if click
-        click.activity = click.activity + 1
+        click.activity = click.activity.to_i + 1
         click.save
         render json: click
       end
