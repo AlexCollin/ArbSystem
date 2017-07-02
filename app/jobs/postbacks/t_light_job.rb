@@ -7,7 +7,7 @@ class Postbacks::TLightJob < ApplicationJob
     conversion = args[0][:conversion]
     params = {
         :key => 'dPimhuccBmkrCb6zrz3YVy3zixA1BOlKrmtY5',
-        :offer_id => 512,
+        :offer_id => args[0][:offer_id],
         :id => conversion.id,
         :name => conversion.client_name,
         :phone => conversion.client_phone,

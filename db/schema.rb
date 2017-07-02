@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170422155645) do
+ActiveRecord::Schema.define(version: 20170702193136) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -63,6 +63,8 @@ ActiveRecord::Schema.define(version: 20170422155645) do
     t.datetime "updated_at", precision: 6
     t.integer  "visitor_id"
     t.integer  "activity"
+    t.integer  "offer_id"
+    t.index ["offer_id"], name: "index_clicks_on_offer_id", using: :btree
     t.index ["visitor_id"], name: "index_clicks_on_visitor_id", using: :btree
   end
 
@@ -80,8 +82,16 @@ ActiveRecord::Schema.define(version: 20170422155645) do
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
     t.integer  "visitor_id"
+    t.integer  "offer_id"
     t.index ["click_id"], name: "index_conversions_on_click_id", using: :btree
+    t.index ["offer_id"], name: "index_conversions_on_offer_id", using: :btree
     t.index ["visitor_id"], name: "index_conversions_on_visitor_id", using: :btree
+  end
+
+  create_table "offers", force: :cascade do |t|
+    t.string   "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "visitors", force: :cascade do |t|

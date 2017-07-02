@@ -8,7 +8,9 @@ class Conversion < ApplicationRecord
   def send_postback
     if self.status == 0
       unless self.ext_id
-        Postbacks::TLightJob.perform_now(:conversion => self)
+        if self.offer_id == 2
+          Postbacks::TLightJob.perform_now(:conversion => self, :offer_id => 512)
+        end
       end
     end
   end

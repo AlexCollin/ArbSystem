@@ -18,6 +18,7 @@ class Tracker::ConversionController < Tracker::TrackerController
     @conversion.client_address = params[:address]
     @conversion.client_comment = params[:comment]
     @conversion.extra = params[:extra]
+    @conversion.offer_id = params[:offer_id]
     @conversion.status = 0
     if params[:approve]
       @conversion.status = 1

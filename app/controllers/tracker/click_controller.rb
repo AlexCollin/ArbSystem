@@ -24,6 +24,7 @@ class Tracker::ClickController < Tracker::TrackerController
       click.s7 = params[:s7] if params[:s7]
       click.s8 = params[:s8] if params[:s8]
       click.s9 = params[:s9] if params[:s9]
+      click.offer_id = params[:offer_id] if params[:offer_id]
       click.save
       $hits_cache.set(hit_ident, click.id, {ex: 1.day})
     end
