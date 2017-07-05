@@ -15,6 +15,11 @@ class Tracker::ClickController < Tracker::TrackerController
       click.referer = params[:referer]
       click.cpc = params[:cpc].to_f.round(2)
       click.amount = 1
+      click.utm_source = params[:utm_source] if params[:utm_source]
+      click.utm_medium = params[:utm_medium] if params[:utm_medium]
+      click.utm_campaign = params[:utm_campaign] if params[:utm_campaign]
+      click.utm_content = params[:utm_content] if params[:utm_content]
+      click.utm_term = params[:utm_term] if params[:utm_term]
       click.s1 = params[:s1] if params[:s1]
       click.s2 = params[:s2] if params[:s2]
       click.s3 = params[:s3] if params[:s3]
