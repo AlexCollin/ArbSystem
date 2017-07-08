@@ -1,0 +1,2 @@
+class Creative < ApplicationRecord
+end

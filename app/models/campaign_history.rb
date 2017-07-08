@@ -1,0 +1,2 @@
+class CampaignHistory < ApplicationRecord
+end

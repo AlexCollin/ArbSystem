@@ -1,6 +1,6 @@
 class CreateCampaignHistory < ActiveRecord::Migration[5.0]
   def change
-    create_table :campaign_history do |t|
+    create_table :campaign_histories do |t|
       t.string :name
       t.text :description
       t.string :adv_type
@@ -11,6 +11,6 @@ class CreateCampaignHistory < ActiveRecord::Migration[5.0]
       t.integer :views_count
       t.timestamps
     end
-    add_reference :campaign_history, :campaigns
+    add_reference :campaign_histories, :campaigns
   end
 end
