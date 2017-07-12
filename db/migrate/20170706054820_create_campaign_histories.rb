@@ -11,6 +11,6 @@ class CreateCampaignHistory < ActiveRecord::Migration[5.0]
       t.integer :views_count
       t.timestamps
     end
-    add_reference :campaign_histories, :campaigns
+    add_reference :campaign_histories, :campaign
   end
 end

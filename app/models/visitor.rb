@@ -2,6 +2,10 @@ class Visitor < ApplicationRecord
   has_many :clicks
   has_many :conversions
 
+  def to_s
+    self.ip
+  end
+
   def self.get(ip,ua)
     ident = Digest::MD5.hexdigest(ip.to_s+ua.to_s)
     visitor = Visitor.find_by(:ident => ident)

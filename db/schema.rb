@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170707193135) do
+ActiveRecord::Schema.define(version: 20170712100703) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -46,21 +46,6 @@ ActiveRecord::Schema.define(version: 20170707193135) do
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true, using: :btree
   end
 
-  create_table "campaign_histories", id: :integer, default: -> { "nextval('campaign_history_id_seq'::regclass)" }, force: :cascade do |t|
-    t.string   "name"
-    t.text     "description"
-    t.string   "adv_type"
-    t.boolean  "incremental_views", default: true
-    t.string   "payment_model"
-    t.float    "traffic_cost"
-    t.float    "lead_cost"
-    t.integer  "views_count"
-    t.datetime "created_at",                       null: false
-    t.datetime "updated_at",                       null: false
-    t.integer  "campaigns_id"
-    t.index ["campaigns_id"], name: "index_campaign_history_on_campaigns_id", using: :btree
-  end
-
   create_table "campaigns", force: :cascade do |t|
     t.string   "name"
     t.text     "description"
@@ -72,19 +57,21 @@ ActiveRecord::Schema.define(version: 20170707193135) do
     t.integer  "views_count"
     t.datetime "created_at",                       null: false
     t.datetime "updated_at",                       null: false
-    t.integer  "offers_id"
+    t.integer  "offer_id"
     t.integer  "source_id"
-    t.index ["offers_id"], name: "index_campaigns_on_offers_id", using: :btree
+    t.integer  "parent_id"
+    t.index ["offer_id"], name: "index_campaigns_on_offers_id", using: :btree
+    t.index ["parent_id"], name: "index_campaigns_on_parent_id", using: :btree
     t.index ["source_id"], name: "index_campaigns_on_source_id", using: :btree
   end
 
   create_table "campaigns_creatives", id: false, force: :cascade do |t|
-    t.integer "campaign_id",         null: false
-    t.integer "creative_id",         null: false
-    t.integer "campaign_history_id"
-    t.index ["campaign_history_id"], name: "index_campaigns_creatives_on_campaign_history_id", using: :btree
+    t.integer "campaign_id", null: false
+    t.integer "creative_id", null: false
+    t.integer "history_id"
     t.index ["campaign_id"], name: "index_campaigns_creatives_on_campaign_id", using: :btree
     t.index ["creative_id"], name: "index_campaigns_creatives_on_creative_id", using: :btree
+    t.index ["history_id"], name: "index_campaigns_creatives_on_history_id", using: :btree
   end
 
   create_table "categories", force: :cascade do |t|
@@ -112,8 +99,8 @@ ActiveRecord::Schema.define(version: 20170707193135) do
     t.string   "s7"
     t.string   "s8"
     t.string   "s9"
-    t.datetime "created_at",          precision: 6
-    t.datetime "updated_at",          precision: 6
+    t.datetime "created_at",   precision: 6
+    t.datetime "updated_at",   precision: 6
     t.integer  "visitor_id"
     t.integer  "activity"
     t.string   "utm_source"
@@ -122,9 +109,9 @@ ActiveRecord::Schema.define(version: 20170707193135) do
     t.string   "utm_content"
     t.string   "utm_term"
     t.integer  "campaign_id"
-    t.integer  "campaign_history_id"
-    t.index ["campaign_history_id"], name: "index_clicks_on_campaign_history_id", using: :btree
+    t.integer  "history_id"
     t.index ["campaign_id"], name: "index_clicks_on_campaign_id", using: :btree
+    t.index ["history_id"], name: "index_clicks_on_history_id", using: :btree
     t.index ["visitor_id"], name: "index_clicks_on_visitor_id", using: :btree
   end
 
@@ -139,14 +126,14 @@ ActiveRecord::Schema.define(version: 20170707193135) do
     t.string   "ext_id"
     t.string   "ext_comment"
     t.string   "ext_payout"
-    t.datetime "created_at",          null: false
-    t.datetime "updated_at",          null: false
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
     t.integer  "visitor_id"
     t.integer  "campaign_id"
-    t.integer  "campaign_history_id"
-    t.index ["campaign_history_id"], name: "index_conversions_on_campaign_history_id", using: :btree
+    t.integer  "history_id"
     t.index ["campaign_id"], name: "index_conversions_on_campaign_id", using: :btree
     t.index ["click_id"], name: "index_conversions_on_click_id", using: :btree
+    t.index ["history_id"], name: "index_conversions_on_history_id", using: :btree
     t.index ["visitor_id"], name: "index_conversions_on_visitor_id", using: :btree
   end
 

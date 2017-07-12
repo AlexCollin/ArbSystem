@@ -11,6 +11,6 @@ class CreateCampaigns < ActiveRecord::Migration[5.0]
       t.integer :views_count
       t.timestamps
     end
-    add_reference :campaigns, :offers
+    add_reference :campaigns, :offer
   end
 end

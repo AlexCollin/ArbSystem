@@ -1,7 +1,7 @@
 ActiveAdmin.register Offer do
   includes :categories
 
-  permit_params :name, categories_attributes: [:name], category_ids: []
+  permit_params :name, category_ids: []
 
   remove_filter :categories_offers
 
