@@ -8,6 +8,8 @@ Rails.application.configure do
 
   config.cache_store = :redis_store, "redis://arbitrage.collin.su:6379/0/cache", { expires_in: 1.day }
 
+  config.session_store :redis_store, servers: ["redis://arbitrage.collin.su:6379/0/session"]
+
   # Do not eager load code on boot.
   config.eager_load = false
 

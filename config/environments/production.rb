@@ -6,6 +6,8 @@ Rails.application.configure do
 
   config.cache_store = :redis_store, "redis://arbitrage.collin.su:6379/0/cache", { expires_in: 1.day }
 
+  config.session_store :redis_store, servers: ["redis://arbitrage.collin.su:6379/0/session"]
+
   # Eager load code on boot. This eager loads most of Rails and
   # your application in memory, allowing both threaded web servers
   # and those relying on copy on write to perform better.

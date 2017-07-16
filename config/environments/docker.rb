@@ -8,6 +8,8 @@ Rails.application.configure do
 
   config.cache_store = :memory_store
 
+  config.session_store :cookie_store, key: '_colar_session'
+
   # Do not eager load code on boot.
   config.eager_load = false
 

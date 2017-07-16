@@ -5,7 +5,7 @@ default: &default
   # http://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
-development: &development
+development:
   <<: *default
   host: 10.0.1.200
   database: arbitrage
@@ -13,11 +13,10 @@ development: &development
   password: rewS4-werwolf
 
 docker:
-  <<: *development
+  <<: *default
   host: 127.0.0.1
   database: colar
   username: postgres
-  password:
 
 test:
   <<: *default
