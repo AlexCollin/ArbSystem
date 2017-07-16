@@ -11,8 +11,6 @@ module Arbitrage
     config.time_zone = 'Europe/Moscow'
     config.i18n.default_locale = :ru
 
-    config.cache_store = :redis_store, "redis://arbitrage.collin.su:6379/0/cache", { expires_in: 1.day }
-
     # controller = Daemons::Rails::Monitoring.controller('poller.rb')
     # if controller.status != :running
     #   controller.start
