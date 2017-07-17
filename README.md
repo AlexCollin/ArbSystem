@@ -21,4 +21,5 @@ Things you may want to cover:
 
 * Deployment instructions
 
-* ...
+* Gems
+   - [Paperplip (Image Upload)](https://github.com/thoughtbot/paperclip)

@@ -41,6 +41,8 @@ gem 'redis'
 gem 'redis-namespace'
 gem 'redis-rails'
 gem 'redis-rack-cache'
+
+gem 'paperclip', '~> 5.0.0'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 

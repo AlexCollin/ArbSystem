@@ -1,8 +1,11 @@
 class Campaign < ApplicationRecord
   has_many :histories, foreign_key: 'parent_id', class_name: 'Campaign'
+  has_and_belongs_to_many :creatives
   has_one :parent, foreign_key: 'parent_id', class_name: 'Campaign'
   belongs_to :source
   belongs_to :offer
+
+  attr_accessor :history_action
 
   # enum payment_model: [ :cpc, :cpm]
 
@@ -18,14 +21,31 @@ class Campaign < ApplicationRecord
     self.name
   end
 
-  def self.get_views_count_from_history(id)
+  def make_history(views_count)
+    history = self.dup
+    history.parent_id = self.id
+    history.views_count = views_count
+    if history.save
+      Click.where(history_id: nil, campaign_id: self.id)
+          .update_all(history_id: history.id)
+      Click.where(history_id: nil, campaign_id: self.id)
+          .update_all(history_id: history.id)
+      history
+    end
+  end
+
+  def get_views_count_from_history(with_self=false)
     total_views = 0
-    histories = Campaign.where({:parent_id => id, :incremental_views => true}).all
+    histories = Campaign.where({:parent_id => self.id, :incremental_views => true}).all
     if histories
       histories.each do |h|
         total_views += h.views_count
       end
     end
-    total_views
+    if with_self
+      total_views + self.views_count
+    else
+      total_views
+    end
   end
 end
