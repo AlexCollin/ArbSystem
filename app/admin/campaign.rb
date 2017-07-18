@@ -60,6 +60,31 @@ ActiveAdmin.register Campaign do
     actions
   end
 
+  show do |s|
+    attributes_table do
+      row :name
+      row :description
+      row :adv_type
+      row :incremental_views
+      row :payment_model, as: :string
+      row :traffic_cost
+      row :lead_cost
+      row 'Self views' do
+        s.views_count
+      end
+      if s.parent_id
+        row :parent
+      else
+        row 'Total Views' do
+          span s.get_views_count_from_history(true)
+        end
+      end
+      row :offer
+      row :source
+    end
+    active_admin_comments
+  end
+
   form do |f|
     f.semantic_errors
     tabs do
@@ -73,7 +98,7 @@ ActiveAdmin.register Campaign do
           else
             f.input :incremental_views, as: :hidden
           end
-          f.input :payment_model, as: :select, collection: {'Cost Per Click': 'cpc', 'Cost Per Mile': 'cpm'}, include_blank: true, allow_blank: false
+          f.input :payment_model, as: :select, :collection => {'Cost Per Click' => 'cpc', 'Cost Per Mile' => 'cpm'}, include_blank: true, allow_blank: false
           f.input :traffic_cost
           f.input :lead_cost
           if f.object.new_record?
@@ -105,7 +130,7 @@ ActiveAdmin.register Campaign do
     end
     unless f.object.new_record?
       f.inputs do
-        f.input :history_action, as: :select, collection: {'Не создавать историю': false, 'Создать историю': 'create'}, include_blank: false
+        f.input :history_action, as: :select, :collection => {'Не создавать историю' => false, 'Создать историю' => 'create'}, include_blank: false
       end
     end
     f.actions
