@@ -50,12 +50,15 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
       span (row.clicks.to_f / row.campaign.views_count.to_f).round(2).to_s + '%'
     end
     column 'CPC' do |row|
-      span (row.clicks.to_f / row.campaign.views_count.to_f).round(2).to_s + '%'
+      span ((row.money_approve.to_f) / row.clicks.to_f).round(2).to_s + '₽'
     end
-    column 'EPC' do |row|
+    column 'CPM' do |row|
+      span (row.money_approve.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
+    end
+    column 'REPC' do |row|
       span (row.money_approve.to_f / row.clicks.to_f).round(2).to_s + '₽'
     end
-    column 'EEPC' do |row|
+    column 'EPC' do |row|
       all = row.money_approve.to_f + row.money_wait.to_f + row.money_decline.to_f
       span (all.to_f / row.clicks.to_f).round(2).to_s + '₽'
     end
