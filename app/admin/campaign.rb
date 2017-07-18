@@ -82,6 +82,14 @@ ActiveAdmin.register Campaign do
       row :offer
       row :source
     end
+    table_for s.creatives do
+      column :title
+      column :text
+      column :description
+      column 'Image' do |img|
+        image_tag(img.image.url(:thumb))
+      end
+    end
     active_admin_comments
   end
 
