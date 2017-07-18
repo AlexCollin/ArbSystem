@@ -10,20 +10,20 @@ ActiveAdmin.register Campaign do
 
     def update(options={}, &block)
       campaign = Campaign.find(params[:id])
-
-      views_count = params[:campaign][:views_count].to_i
+      orig_creatives = campaign.creatives.dup
+      orig_views_count = params[:campaign][:views_count].to_i
       if params[:campaign][:incremental_views] == 'true' and params[:campaign][:views_count].to_i > 0
-        views_count = params[:campaign][:views_count].to_i - campaign.get_views_count_from_history
+        orig_views_count = params[:campaign][:views_count].to_i - campaign.get_views_count_from_history
       end
       if params[:campaign][:history_action] == 'create'
         params[:campaign][:views_count] = 0
       else
-        params[:campaign][:views_count] = views_count
+        params[:campaign][:views_count] = orig_views_count
       end
       super do |success, failure|
         unless success.class.nil?
-          if params[:campaign][:history_action] == 'create'
-            campaign.make_history(views_count)
+          if params[:campaign][:history_action] == 'create' and campaign.parent_id.nil?
+            campaign.make_history(orig_views_count, orig_creatives)
           end
         end
         block.call(success, failure) if block

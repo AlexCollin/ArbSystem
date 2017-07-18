@@ -1,8 +1,8 @@
-ActiveAdmin.register Click, as: 'Statistics' do
+ActiveAdmin.register Click do
+  menu parent: 'Traffic'
   includes :conversions
 
-  menu :priority => 2
-  menu label: "Statistics"
+  # menu :priority => 2
 
   # controller do
   #   def scoped_collection

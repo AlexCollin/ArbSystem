@@ -1,4 +1,5 @@
 ActiveAdmin.register Creative do
+  menu parent: 'Campaigns'
 
   permit_params :title, :text, :description, :offer_id, :image
 

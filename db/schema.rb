@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170717165218) do
+ActiveRecord::Schema.define(version: 20170718060810) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -68,10 +68,8 @@ ActiveRecord::Schema.define(version: 20170717165218) do
   create_table "campaigns_creatives", id: false, force: :cascade do |t|
     t.integer "campaign_id", null: false
     t.integer "creative_id", null: false
-    t.integer "history_id"
     t.index ["campaign_id"], name: "index_campaigns_creatives_on_campaign_id", using: :btree
     t.index ["creative_id"], name: "index_campaigns_creatives_on_creative_id", using: :btree
-    t.index ["history_id"], name: "index_campaigns_creatives_on_history_id", using: :btree
   end
 
   create_table "categories", force: :cascade do |t|

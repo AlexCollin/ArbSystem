@@ -6,10 +6,6 @@ class Creative < ApplicationRecord
   # accepts_nested_attributes_for :campaigns_creatives
   #has_attached_file :image
 
-  #validates_attachment_file_name :image , :matches => [/r\Z/, /R\Z/]
-
-  #do_not_validate_attachment_file_type :image
-
   has_attached_file :image, styles: { medium: "300x300>", thumb: "100x100>" }, default_url: "/images/:style/missing.png"
   validates_attachment_content_type :image, content_type: /\Aimage\/.*\z/
   validates_attachment_file_name :image, matches: [/png\z/, /jpe?g\z/]

@@ -1,4 +1,5 @@
 ActiveAdmin.register Category do
+  menu parent: 'Offers'
   permit_params :name
 
   # controller do

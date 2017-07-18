@@ -13,6 +13,7 @@ class Campaign < ApplicationRecord
             :presence => true
 
   before_save :default_values
+
   def default_values
     self.views_count ||= 0
   end
@@ -21,17 +22,19 @@ class Campaign < ApplicationRecord
     self.name
   end
 
-  def make_history(views_count)
+  def make_history(views_count, creatives)
     history = self.dup
     history.parent_id = self.id
     history.views_count = views_count
+    history.creatives << creatives
     if history.save
       Click.where(history_id: nil, campaign_id: self.id)
           .update_all(history_id: history.id)
-      Click.where(history_id: nil, campaign_id: self.id)
+      Conversion.where(history_id: nil, campaign_id: self.id)
           .update_all(history_id: history.id)
       history
     end
+
   end
 
   def get_views_count_from_history(with_self=false)
