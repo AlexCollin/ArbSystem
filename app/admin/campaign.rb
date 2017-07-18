@@ -41,6 +41,7 @@ ActiveAdmin.register Campaign do
 
   index do
     selectable_column
+    index_column
     column :name
     column :description
     column :adv_type
@@ -62,6 +63,7 @@ ActiveAdmin.register Campaign do
 
   show do |s|
     attributes_table do
+      row :id
       row :name
       row :description
       row :adv_type

@@ -1,1 +1,0 @@
-$hits_cache = Redis::Namespace.new("hits", :redis => Redis.new(:host => 'arbitrage.collin.su'))

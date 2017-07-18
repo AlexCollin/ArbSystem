@@ -1,4 +1,6 @@
 Rails.application.configure do
+
+  $hits_cache = Redis::Namespace.new("hits", :redis => Redis.new(:host => 'localhost'))
   # Settings specified here will take precedence over those in config/application.rb.
 
   # In the development environment your application's code is reloaded on
@@ -6,9 +8,9 @@ Rails.application.configure do
   # since you don't have to restart the web server when you make code changes.
   config.cache_classes = false
 
-  config.cache_store = :memory_store
+  config.cache_store = :redis_store, "redis://localhost:6379/0/cache", { expires_in: 1.day }
 
-  config.session_store :cookie_store, key: '_colar_session'
+  config.session_store :redis_store, servers: ["redis://localhost:6379/0/session"]
 
   # Do not eager load code on boot.
   config.eager_load = false
