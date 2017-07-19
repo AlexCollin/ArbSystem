@@ -53,6 +53,13 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
         end
       end
     end
+    column 'Model' do |row|
+      if row.campaign
+        span "#{row.campaign.payment_model} (#{row.campaign.traffic_cost}₽)"
+      else
+        span '-'
+      end
+    end
     column :clicks
     column :actives
     column :hits
@@ -74,22 +81,45 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
         span '-'
       end
     end
-    column 'CPC' do |row|
-      span ((row.money_approve.to_f) / row.clicks.to_f).round(2).to_s + '₽'
-    end
-    column 'CPM' do |row|
-      if row.campaign
-        span (row.money_approve.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
-      else
-        span '-'
-      end
-    end
     column 'EPC' do |row|
-      all = row.money_approve.to_f + row.money_wait.to_f + row.money_decline.to_f
+      all = row.money_approve.to_f + row.money_wait.to_f
       span (all.to_f / row.clicks.to_f).round(2).to_s + '₽'
     end
     column 'R-EPC' do |row|
       span (row.money_approve.to_f / row.clicks.to_f).round(2).to_s + '₽'
+    end
+    column 'C-EPC' do |row|
+      if row.campaign and row.campaign.payment_model == 'cpc'
+        if row.campaign.payment_model == 'cpc'
+          span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
+              row.clicks.to_f).round(2).to_s + '₽'
+        elsif row.campaign.payment_model == 'cpm'
+          span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
+              row.clicks.to_f).round(2).to_s + '₽'
+        end
+      else
+        span '-'
+      end
+    end
+    column 'EPM' do |row|
+      all = row.money_approve.to_f + row.money_wait.to_f
+      span (all.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
+    end
+    column 'R-EPM' do |row|
+      span (row.money_approve.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
+    end
+    column 'C-EPM' do |row|
+      if row.campaign and row.campaign.payment_model == 'cpm'
+        if row.campaign.payment_model == 'cpc'
+          span ((row.money_approve.to_f - ((row.campaign.views_count.to_f/1000) * row.campaign.traffic_cost.to_f)) /
+              row.campaign.views_count.to_f).round(2).to_s + '₽'
+        elsif row.campaign.payment_model == 'cpm'
+          span ((row.money_approve.to_f - ((row.campaign.views_count.to_f/1000) * row.campaign.traffic_cost.to_f)) /
+              row.campaign.views_count.to_f).round(2).to_s + '₽'
+        end
+      else
+        span '-'
+      end
     end
     column 'CR' do |row|
       all = row.wait + row.approve + row.decline
@@ -99,17 +129,16 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
         span 0.to_s + '%'
       end
     end
-    column :wait
-    column :approve
-    column :decline
-    column :money_wait do |row|
-      span row.money_wait.to_s + '₽'
+    column 'Leads (W/A/D)' do |row|
+      span row.wait.to_s + ' /', style: 'color: blue'
+      span row.approve.to_s + ' /', style: 'color: green'
+      span row.decline.to_s, style: 'color: red'
     end
-    column :money_approve do |row|
-      span row.money_approve.to_s + '₽'
-    end
-    column :money_decline do |row|
-      span row.money_decline.to_s + '₽'
+    column 'Money (W/A/D)' do |row|
+      span row.money_wait.to_s + ' /', style: 'color: blue'
+      span row.money_approve.to_s + ' /', style: 'color: green'
+      span row.money_decline.to_s, style: 'color: red'
+      span '₽'
     end
     table_for :histories do |r|
       columns do
