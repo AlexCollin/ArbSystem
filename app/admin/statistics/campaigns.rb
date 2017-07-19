@@ -4,7 +4,8 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
 
   menu parent: "Statistics", label: 'Campaigns'
   scope 'Parents', default: true do |scope|
-    scope.select('campaign_id').group('clicks.campaign_id').reorder('campaign_id')
+    scope.select('clicks.campaign_id, clicks.history_id')
+        .group('clicks.history_id').group('clicks.campaign_id').reorder('clicks.campaign_id DESC, clicks.history_id DESC')
   end
   # scope 's2' do |scope|
   #   scope.select('s2').group('clicks.s2').reorder('s2')
@@ -43,24 +44,52 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
     #   scope = 'All'
     # end
     # column scope
+    column :campaign do |row|
+      if row.campaign
+        if row.history_id
+          link_to "-> #{row.campaign.created_at.strftime('%d.%m.%y')}", admin_campaign_path(row.history_id)
+        else
+          link_to row.campaign, admin_campaign_path(row.campaign_id)
+        end
+      end
+    end
     column :clicks
     column :actives
     column :hits
+    column 'Views' do |row|
+      if row.campaign
+        if row.history_id
+          span row.history.views_count.to_s
+        else
+          span row.campaign.views_count.to_s
+        end
+      else
+        span '-'
+      end
+    end
     column 'CTR' do |row|
-      span (row.clicks.to_f / row.campaign.views_count.to_f).round(2).to_s + '%'
+      if row.campaign
+        span (row.clicks.to_f / row.campaign.views_count.to_f).round(2).to_s + '%'
+      else
+        span '-'
+      end
     end
     column 'CPC' do |row|
       span ((row.money_approve.to_f) / row.clicks.to_f).round(2).to_s + '₽'
     end
     column 'CPM' do |row|
-      span (row.money_approve.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
-    end
-    column 'REPC' do |row|
-      span (row.money_approve.to_f / row.clicks.to_f).round(2).to_s + '₽'
+      if row.campaign
+        span (row.money_approve.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
     end
     column 'EPC' do |row|
       all = row.money_approve.to_f + row.money_wait.to_f + row.money_decline.to_f
       span (all.to_f / row.clicks.to_f).round(2).to_s + '₽'
+    end
+    column 'R-EPC' do |row|
+      span (row.money_approve.to_f / row.clicks.to_f).round(2).to_s + '₽'
     end
     column 'CR' do |row|
       all = row.wait + row.approve + row.decline
@@ -82,11 +111,18 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
     column :money_decline do |row|
       span row.money_decline.to_s + '₽'
     end
+    table_for :histories do |r|
+      columns do
+        column do |row|
+          span r
+        end
+      end
+    end
   end
 
   controller do
     def scoped_collection
-      Click.left_outer_joins(:conversions,:campaign)
+      Click.left_outer_joins(:conversions)
           .select(
               'sum(case when clicks.amount > 0 then 1 else 0 end) clicks',
               'sum(case when clicks.activity::int > 0 then 1 else 0 end) actives',

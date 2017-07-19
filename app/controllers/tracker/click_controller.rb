@@ -9,6 +9,7 @@ class Tracker::ClickController < Tracker::TrackerController
       click.amount += 1
       click.updated_at = Time.now
       click.save
+      render json: click
     else
       click = Click.new
       click.visitor_id = visitor
@@ -29,11 +30,14 @@ class Tracker::ClickController < Tracker::TrackerController
       click.s7 = params[:s7] if params[:s7]
       click.s8 = params[:s8] if params[:s8]
       click.s9 = params[:s9] if params[:s9]
-      click.campaign_id = params[:campaign] if params[:campaign]
-      click.save
-      $hits_cache.set(hit_ident, click.id, {ex: 1.day})
+      click.campaign_id = params[:campaign].to_i if params[:campaign].to_i
+      if click.save
+        $hits_cache.set(hit_ident, click.id, {ex: 1.day})
+        render json: click
+      else
+        render json: click.errors
+      end
     end
-    render json: click
   end
 
   def activity
