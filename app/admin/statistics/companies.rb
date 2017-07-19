@@ -1,11 +1,11 @@
-ActiveAdmin.register Click, as: 'OldStatisticsForCampaigns' do
+ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
   actions :all, only: []
 
 
-  menu parent: "Statistics", label: 'Campaigns Old'
+  menu parent: "Statistics", label: 'Campaigns'
   scope 'Parents', default: true do |scope|
     scope.select('clicks.campaign_id, clicks.history_id')
-        .group('clicks.history_id').group('clicks.campaign_id').group('campaigns.id')
+        .group('clicks.history_id').group('clicks.campaign_id')
         .reorder('clicks.campaign_id DESC, clicks.history_id DESC')
   end
   # scope 's2' do |scope|
@@ -40,12 +40,12 @@ ActiveAdmin.register Click, as: 'OldStatisticsForCampaigns' do
   #   end
   # end
   before_filter :only => [:index] do
-    if params['q'] and params['q']['campaign_id_eq'].blank?
-      params['q'] = {'campaign_id' => Campaign.workings.first.id}
+    if params['campaign_id'].blank? and (not params['q'] or params['q']['campaign_id_eq'].blank?)
+      params['q'] = {'campaign_id_eq' => Campaign.workings.last.id}
     end
   end
 
-  filter :campaign , :collection => Campaign.all.map { |o| [o.name, o.id] }, :include_blank => false
+  filter :campaign, :collection => Campaign.workings.map { |o| [o.name, o.id] }, :include_blank => false
   filter :created_at
 
   index :row_class => -> record { 'index_table_working_campaigns' unless record.history_id } do
@@ -111,7 +111,7 @@ ActiveAdmin.register Click, as: 'OldStatisticsForCampaigns' do
         span '-'
       end
     end
-    column 'EPM'  do |row|
+    column 'EPM' do |row|
       all = row.money_approve.to_f + row.money_wait.to_f
       span (all.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
     end
