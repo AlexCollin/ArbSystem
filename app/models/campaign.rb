@@ -1,4 +1,6 @@
 class Campaign < ApplicationRecord
+  has_many :clicks
+  has_many :conversions
   has_many :histories, foreign_key: 'parent_id', class_name: 'Campaign'
   has_and_belongs_to_many :creatives
   has_one :parent, foreign_key: 'parent_id', class_name: 'Campaign'
@@ -17,6 +19,9 @@ class Campaign < ApplicationRecord
   def default_values
     self.views_count ||= 0
   end
+
+  scope :workings, -> { where('parent_id IS NULL') }
+  scope :histories, -> { where('parent_id IS NOT NULL') }
 
   def to_s
     self.name

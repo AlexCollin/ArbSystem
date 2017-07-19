@@ -3,10 +3,14 @@ ActiveAdmin.register Campaign do
                 :traffic_cost, :lead_cost, :incremental_views, :offer_id, :source_id, :views_count,
                 creative_ids: []
 
+  scope 'Parents', default: true do |scope|
+    scope.where(:parent_id => nil)
+  end
+  scope 'With Histories', default: true do |scope|
+    scope.reorder('id ASC, parent_id ASC')
+  end
+
   controller do
-    def scoped_collection
-      Campaign.where(:parent_id => nil)
-    end
 
     def update(options={}, &block)
       campaign = Campaign.find(params[:id])
@@ -39,9 +43,9 @@ ActiveAdmin.register Campaign do
     end
   end
 
-  index do
+  index :row_class => -> record { 'index_table_working_campaigns' unless record.parent_id } do
     selectable_column
-    index_column
+    column :id
     column :name
     column :description
     column :adv_type
@@ -75,7 +79,7 @@ ActiveAdmin.register Campaign do
         s.views_count
       end
       if s.parent_id
-        row :parent
+        row :parent_id
       else
         row 'Total Views' do
           span s.get_views_count_from_history(true)
@@ -138,7 +142,7 @@ ActiveAdmin.register Campaign do
         end
       end
     end
-    unless f.object.new_record?
+    unless f.object.new_record? or f.object.parent_id
       f.inputs do
         f.input :history_action, as: :select, :collection => {'Не создавать историю' => false, 'Создать историю' => 'create'}, include_blank: false
       end
