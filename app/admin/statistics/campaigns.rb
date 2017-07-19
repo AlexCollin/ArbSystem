@@ -85,10 +85,10 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
       all = row.money_approve.to_f + row.money_wait.to_f
       span (all.to_f / row.clicks.to_f).round(2).to_s + '₽'
     end
-    column 'R-EPC' do |row|
+    column 'REPC' do |row|
       span (row.money_approve.to_f / row.clicks.to_f).round(2).to_s + '₽'
     end
-    column 'C-EPC' do |row|
+    column 'CEPC' do |row|
       if row.campaign and row.campaign.payment_model == 'cpc'
         if row.campaign.payment_model == 'cpc'
           span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
@@ -101,14 +101,14 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
         span '-'
       end
     end
-    column 'EPM' do |row|
+    column 'EPM'  do |row|
       all = row.money_approve.to_f + row.money_wait.to_f
       span (all.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
     end
-    column 'R-EPM' do |row|
+    column 'REPM' do |row|
       span (row.money_approve.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
     end
-    column 'C-EPM' do |row|
+    column 'CEPM' do |row|
       if row.campaign and row.campaign.payment_model == 'cpm'
         if row.campaign.payment_model == 'cpc'
           span ((row.money_approve.to_f - ((row.campaign.views_count.to_f/1000) * row.campaign.traffic_cost.to_f)) /
