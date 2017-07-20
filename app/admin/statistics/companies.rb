@@ -87,7 +87,11 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
     end
     column 'CTR' do |row|
       if row.campaign
-        span (row.clicks.to_f / row.campaign.views_count.to_f).round(2).to_s + '%'
+        if row.history_id
+          span (row.clicks.to_f / row.history.views_count.to_f).round(3).to_s + '%'
+        else
+          span (row.clicks.to_f / row.campaign.views_count.to_f).round(3).to_s + '%'
+        end
       else
         span '-'
       end
