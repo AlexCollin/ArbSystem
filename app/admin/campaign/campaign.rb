@@ -134,7 +134,7 @@ ActiveAdmin.register Campaign do
           views_count
         end
         column 'CTR' do
-          span (clicks.to_f / views_count.to_f).round(2).to_s + '%'
+          span (clicks.to_f / views_count.to_f).round(3).to_s + '%'
         end
         column 'EPC' do
           all = money_approve.to_f + money_wait.to_f
@@ -145,8 +145,7 @@ ActiveAdmin.register Campaign do
         end
         column 'CEPC' do
           if s.payment_model == 'cpc'
-            span ((money_approve.to_f - (clicks.to_f * s.traffic_cost.to_f)) /
-                clicks.to_f).round(2).to_s + '₽'
+            span ((money_approve.to_f - (clicks.to_f * s.traffic_cost.to_f))).round(2).to_s + '₽'
           else
             span '-'
           end
@@ -160,8 +159,7 @@ ActiveAdmin.register Campaign do
         end
         column 'CEPM' do
           if s.payment_model == 'cpm'
-            span ((money_approve.to_f - ((views_count.to_f/1000) * s.traffic_cost.to_f)) /
-                views_count.to_f).round(2).to_s + '₽'
+            span ((money_approve.to_f - ((views_count.to_f/1000) * s.traffic_cost.to_f))).round(2).to_s + '₽'
           else
             span '-'
           end
@@ -231,7 +229,7 @@ ActiveAdmin.register Campaign do
         end
         column 'CTR' do |row|
           if row.views_count > 0 and row.clicks_count > 0
-            span (row.clicks_count.to_f / row.views_count.to_f).round(2).to_s + '%'
+            span (row.clicks_count.to_f / row.views_count.to_f).round(3).to_s + '%'
           else
             span '-'
           end
@@ -253,8 +251,7 @@ ActiveAdmin.register Campaign do
         end
         column 'CEPC' do |row|
           if row.views_count > 0 and row.payment_model == 'cpc' and row.clicks_count > 0
-            span ((row.conversions_money_approve.to_f - (row.clicks_count.to_f * row.traffic_cost.to_f)) /
-                row.clicks_count.to_f).round(2).to_s + '₽'
+            span (row.conversions_money_approve.to_f - (row.clicks_count.to_f * row.traffic_cost.to_f)).round(2).to_s + '₽'
           else
             span '-'
           end
@@ -276,8 +273,7 @@ ActiveAdmin.register Campaign do
         end
         column 'CEPM' do |row|
           if row.views_count > 0 and row.payment_model == 'cpm'
-            span ((row.conversions_money_approve.to_f - ((row.views_count.to_f/1000) * row.traffic_cost.to_f)) /
-                row.views_count.to_f).round(2).to_s + '₽'
+            span (row.conversions_money_approve.to_f - ((row.views_count.to_f/1000) * row.traffic_cost.to_f)).round(2).to_s + '₽'
           else
             span '-'
           end
