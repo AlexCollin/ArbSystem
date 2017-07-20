@@ -2,7 +2,7 @@
 #   actions :all, only: []
 #
 #
-#   menu parent: "Statistics", label: 'Campaigns'
+#   menu parent: "Statistics", label: 'New Campaigns'
 #   scope 'Parents', default: true do |scope|
 #     scope.select('campaigns.id as ca_id', 'campaigns.parent_id as ca_parent_id',
 #                  'campaigns.payment_model as ca_payment_model',
@@ -44,12 +44,12 @@
 #   # end
 #   before_filter :only => [:index] do
 #     if params['id_or_parent_id'].blank? and (not params['q'] or params['q']['id_or_parent_id_eq'].blank?)
-#       params['q'] = {'id_or_parent_id_eq'=> Campaign.workings.last.id}
+#       params['q'] = {'id_or_parent_id_eq' => Campaign.workings.last.id}
 #     end
 #   end
 #
 #   filter :id_or_parent_id_eq, as: :select, :collection => Campaign.workings.map { |o| [o.name, o.id] }, :include_blank => false
-#   filter :cl_created_at, :as => :date_range
+#   filter :clicks_created_at, as: :date_range
 #
 #   index :row_class => -> record { 'index_table_working_campaigns' unless record.ca_parent_id } do
 #     # scope = params[:scope]
@@ -155,18 +155,22 @@
 #
 #   controller do
 #     def scoped_collection
-#       #Campaign.left_outer_joins(:clicks, :conversions)
-#       Campaign.joins('LEFT JOIN clicks as cl ON (campaigns.id = cl.campaign_id AND cl.history_id IS NULL) OR campaigns.id = cl.history_id')
-#           .left_outer_joins(:conversions).select(
-#               'sum(case when cl.amount > 0 then 1 else 0 end) cl_clicks',
-#               'sum(case when cl.activity::int > 0 then 1 else 0 end) cl_actives',
-#               'sum(case when cl.amount > 0 then cl.amount else 0 end) cl_hits',
-#               'sum(case when conversions.status = 0 then 1 else 0 end) wait',
-#               'sum(case when conversions.status = 1 then 1 else 0 end) approve',
-#               'sum(case when conversions.status = 2 then 1 else 0 end) decline',
-#               'sum(case when conversions.status = 0 then conversions.ext_payout::int else 0 end) money_wait',
-#               'sum(case when conversions.status = 1 then conversions.ext_payout::int else 0 end) money_approve',
-#               'sum(case when conversions.status = 2 then conversions.ext_payout::int else 0 end) money_decline'
+#       # .joins('LEFT JOIN clicks as cl ON (campaigns.id = cl.campaign_id AND cl.history_id IS NULL) OR
+#       # campaigns.id = cl.history_id')
+#       # .left_outer_joins(:clicks,:conversions)
+#       Campaign
+#       .joins('LEFT OUTER JOIN clicks ON (campaigns.id = clicks.campaign_id AND clicks.history_id IS NULL) OR
+#       campaigns.id = clicks.history_id')
+#           .select(
+#               'sum(case when clicks.amount > 0 then 1 else 0 end) cl_clicks',
+#               'sum(case when clicks.activity::int > 0 then 1 else 0 end) cl_actives',
+#               'sum(case when clicks.amount > 0 then clicks.amount else 0 end) cl_hits'
+#               # 'sum(case when conversions.status = 0 then 1 else 0 end) wait',
+#               # 'sum(case when conversions.status = 1 then 1 else 0 end) approve',
+#               # 'sum(case when conversions.status = 2 then 1 else 0 end) decline',
+#               # 'sum(case when conversions.status = 0 then conversions.ext_payout::int else 0 end) money_wait',
+#               # 'sum(case when conversions.status = 1 then conversions.ext_payout::int else 0 end) money_approve',
+#               # 'sum(case when conversions.status = 2 then conversions.ext_payout::int else 0 end) money_decline'
 #           )
 #     end
 #   end
