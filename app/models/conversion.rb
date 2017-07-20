@@ -5,6 +5,10 @@ class Conversion < ApplicationRecord
 
   after_save :send_postback
 
+  scope :waiting, -> { where('status = 0') }
+  scope :approved, -> { where('status = 1') }
+  scope :declined, -> { where('status = 2') }
+
   private
   def send_postback
     if self.status == 0

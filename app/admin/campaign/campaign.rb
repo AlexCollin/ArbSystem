@@ -1,4 +1,5 @@
 ActiveAdmin.register Campaign do
+  includes :clicks, :conversions
   permit_params :name, :description, :adv_type, :adv_type, :payment_model, :history_action,
                 :traffic_cost, :lead_cost, :incremental_views, :offer_id, :source_id, :views_count,
                 creative_ids: []
@@ -61,6 +62,9 @@ ActiveAdmin.register Campaign do
     end
     column :source do |row|
       link_to row.source.name, admin_source_path(row.source_id)
+    end
+    column 'ROI' do |row|
+      span row.clicks.where(:activity => 1).count
     end
     actions
   end

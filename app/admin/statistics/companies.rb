@@ -1,9 +1,10 @@
 ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
+  includes :campaign
   actions :all, only: []
 
 
   menu parent: "Statistics", label: 'Campaigns'
-  scope 'Parents', default: true do |scope|
+  scope 'Coefficients', default: true do |scope|
     scope.select('clicks.campaign_id, clicks.history_id')
         .group('clicks.history_id').group('clicks.campaign_id')
         .reorder('clicks.campaign_id DESC, clicks.history_id DESC')
@@ -100,13 +101,8 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
     end
     column 'CEPC' do |row|
       if row.campaign and row.campaign.payment_model == 'cpc'
-        if row.campaign.payment_model == 'cpc'
-          span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
-              row.clicks.to_f).round(2).to_s + '₽'
-        elsif row.campaign.payment_model == 'cpm'
-          span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
-              row.clicks.to_f).round(2).to_s + '₽'
-        end
+        span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
+            row.clicks.to_f).round(2).to_s + '₽'
       else
         span '-'
       end
@@ -120,13 +116,8 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
     end
     column 'CEPM' do |row|
       if row.campaign and row.campaign.payment_model == 'cpm'
-        if row.campaign.payment_model == 'cpc'
-          span ((row.money_approve.to_f - ((row.campaign.views_count.to_f/1000) * row.campaign.traffic_cost.to_f)) /
-              row.campaign.views_count.to_f).round(2).to_s + '₽'
-        elsif row.campaign.payment_model == 'cpm'
-          span ((row.money_approve.to_f - ((row.campaign.views_count.to_f/1000) * row.campaign.traffic_cost.to_f)) /
-              row.campaign.views_count.to_f).round(2).to_s + '₽'
-        end
+        span ((row.money_approve.to_f - ((row.campaign.views_count.to_f/1000) * row.campaign.traffic_cost.to_f)) /
+            row.campaign.views_count.to_f).round(2).to_s + '₽'
       else
         span '-'
       end
@@ -149,13 +140,6 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
       span row.money_approve.to_s + ' /', style: 'color: green'
       span row.money_decline.to_s, style: 'color: red'
       span '₽'
-    end
-    table_for :histories do |r|
-      columns do
-        column do |row|
-          span r
-        end
-      end
     end
   end
 

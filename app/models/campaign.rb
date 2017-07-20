@@ -1,5 +1,6 @@
 class Campaign < ApplicationRecord
   has_many :clicks
+  has_many :history_clicks, foreign_key: 'history_id', class_name: 'Click'
   has_many :conversions
   has_many :histories, foreign_key: 'parent_id', class_name: 'Campaign'
   has_and_belongs_to_many :creatives
@@ -25,6 +26,19 @@ class Campaign < ApplicationRecord
 
   def to_s
     self.name
+  end
+
+  def money(payout)
+    def waiting(payout)
+      conversions.waiting.count * payout
+    end
+    def approved(payout)
+      conversions.approved.count * payout
+    end
+    def declined(payout)
+      conversions.declined.count * payout
+    end
+    {:waiting => waiting(payout), :approved => approved(payout), :declined => declined(payout)}
   end
 
   def make_history(views_count, creatives)
