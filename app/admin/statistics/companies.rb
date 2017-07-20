@@ -86,42 +86,60 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
       end
     end
     column 'CTR' do |row|
-      if row.campaign
-        if row.history_id
+      if row.campaign and row.clicks > 0
+        if row.history_id and row.history.views_count > 0
           span (row.clicks.to_f / row.history.views_count.to_f).round(3).to_s + '%'
-        else
+        elsif row.campaign.views_count > 0
           span (row.clicks.to_f / row.campaign.views_count.to_f).round(3).to_s + '%'
+        else
+          span '-'
         end
       else
         span '-'
       end
     end
     column 'EPC' do |row|
-      all = row.money_approve.to_f + row.money_wait.to_f
-      span (all.to_f / row.clicks.to_f).round(2).to_s + '₽'
+      if row.clicks > 0
+        all = row.money_approve.to_f + row.money_wait.to_f
+        span (all.to_f / row.clicks.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
     end
     column 'REPC' do |row|
-      span (row.money_approve.to_f / row.clicks.to_f).round(2).to_s + '₽'
+      if row.clicks > 0
+        span (row.money_approve.to_f / row.clicks.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
     end
     column 'CEPC' do |row|
-      if row.campaign and row.campaign.payment_model == 'cpc'
-        span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
-            row.clicks.to_f).round(2).to_s + '₽'
+      if row.clicks > 0 and row.campaign and row.campaign.payment_model == 'cpc'
+          span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
+              row.clicks.to_f).round(2).to_s + '₽'
       else
         span '-'
       end
     end
     column 'EPM' do |row|
-      all = row.money_approve.to_f + row.money_wait.to_f
-      span (all.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
+      if row.campaign.views_count > 0
+        all = row.money_approve.to_f + row.money_wait.to_f
+        span (all.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
     end
     column 'REPM' do |row|
-      span (row.money_approve.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
+      if row.campaign.views_count > 0
+        span (row.money_approve.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
     end
     column 'CEPM' do |row|
-      if row.campaign and row.campaign.payment_model == 'cpm'
-        span ((row.money_approve.to_f - ((row.campaign.views_count.to_f/1000) * row.campaign.traffic_cost.to_f)) /
-            row.campaign.views_count.to_f).round(2).to_s + '₽'
+      if row.campaign and row.campaign.views_count > 0  and row.campaign.payment_model == 'cpm'
+          span ((row.money_approve.to_f - ((row.campaign.views_count.to_f/1000) * row.campaign.traffic_cost.to_f)) /
+              row.campaign.views_count.to_f).round(2).to_s + '₽'
       else
         span '-'
       end
