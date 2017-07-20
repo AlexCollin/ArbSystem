@@ -1,23 +1,23 @@
-ActiveAdmin.register Click, as: 'StatisticsForSubs' do
+ActiveAdmin.register Click, as: 'StatisticsForUtm' do
   actions :all, only: []
 
 
-  menu parent: "Statistics", label: 'SubAccounts'
+  menu parent: 'Statistics', label: 'Utm quotes'
 
-  scope 'S1', default: true do |scope|
-    scope.select('s1').group('clicks.s1').reorder('s1')
+  scope 'Source', default: true do |scope|
+    scope.select('utm_source').group('clicks.utm_source').reorder('utm_source')
   end
-  scope 'S2' do |scope|
-    scope.select('s2').group('clicks.s2').reorder('s2')
+  scope 'Medium' do |scope|
+    scope.select('utm_medium').group('clicks.utm_medium').reorder('utm_medium')
   end
-  scope 'S3' do |scope|
-    scope.select('s3').group('clicks.s3').reorder('s3')
+  scope 'Campaign' do |scope|
+    scope.select('utm_campaign').group('clicks.utm_campaign').reorder('utm_campaign')
   end
-  scope 'S4' do |scope|
-    scope.select('s4').group('clicks.s4').reorder('s4')
+  scope 'Content' do |scope|
+    scope.select('utm_content').group('clicks.utm_content').reorder('utm_content')
   end
-  scope 'S5' do |scope|
-    scope.select('s5').group('clicks.s5').reorder('s5')
+  scope 'Term' do |scope|
+    scope.select('utm_term').group('clicks.utm_term').reorder('utm_term')
   end
 
   # index as: :grouped_table, group_by_attribute: :s1 do
@@ -41,7 +41,7 @@ ActiveAdmin.register Click, as: 'StatisticsForSubs' do
   index do
     scope = params[:scope]
     unless scope
-      scope = 'S1'
+      scope = 'Source'
     end
     column scope
     column :clicks
