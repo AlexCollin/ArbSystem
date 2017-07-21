@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170718060810) do
+ActiveRecord::Schema.define(version: 20170721073304) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -75,6 +75,8 @@ ActiveRecord::Schema.define(version: 20170718060810) do
     t.integer  "offer_id"
     t.integer  "source_id"
     t.integer  "parent_id"
+    t.integer  "landing_id"
+    t.index ["landing_id"], name: "index_campaigns_on_landing_id", using: :btree
     t.index ["offer_id"], name: "index_campaigns_on_offer_id", using: :btree
     t.index ["parent_id"], name: "index_campaigns_on_parent_id", using: :btree
     t.index ["source_id"], name: "index_campaigns_on_source_id", using: :btree
@@ -162,6 +164,15 @@ ActiveRecord::Schema.define(version: 20170718060810) do
     t.integer  "image_file_size"
     t.datetime "image_updated_at"
     t.index ["offer_id"], name: "index_creatives_on_offer_id", using: :btree
+  end
+
+  create_table "landings", force: :cascade do |t|
+    t.string   "name"
+    t.string   "url"
+    t.boolean  "is_external", default: false
+    t.boolean  "is_transit",  default: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
   end
 
   create_table "offers", force: :cascade do |t|
