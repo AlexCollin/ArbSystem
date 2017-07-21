@@ -1,8 +1,8 @@
 ActiveAdmin.register Campaign do
   includes :clicks, :conversions
-  permit_params :name, :description, :adv_type, :adv_type, :payment_model, :history_action,
+  permit_params :name, :description, :adv_type, :adv_type, :payment_model, :history_action, :integration,
                 :traffic_cost, :lead_cost, :incremental_views, :offer_id, :source_id, :landing_id, :views_count,
-                creative_ids: []
+                :integration_offer, creative_ids: []
 
   scope 'Parents', default: true do |scope|
     scope.where(:parent_id => nil)
@@ -57,6 +57,8 @@ ActiveAdmin.register Campaign do
     column :views_count do |row|
       span row.get_views_count_from_history(true)
     end
+    column :integration
+    column :integration_offer
     column :offer do |row|
       link_to row.offer.name, admin_offer_path(row.offer_id)
     end
@@ -98,6 +100,8 @@ ActiveAdmin.register Campaign do
           span s.get_views_count_from_history(true)
         end
       end
+      row :integration
+      row :integration_offer
       row :offer
       row :source
       row :landing
@@ -335,6 +339,12 @@ ActiveAdmin.register Campaign do
               f.input :views_count
             end
           end
+        end
+      end
+      tab 'Интеграция' do
+        f.inputs do
+          f.input :integration, as: :select, :collection => {'Tligth' => 'tlight'}, include_blank: true, allow_blank: true
+          f.input :integration_offer
         end
       end
       unless f.object.new_record?

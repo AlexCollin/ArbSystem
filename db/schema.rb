@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170721073304) do
+ActiveRecord::Schema.define(version: 20170721080433) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -76,6 +76,8 @@ ActiveRecord::Schema.define(version: 20170721073304) do
     t.integer  "source_id"
     t.integer  "parent_id"
     t.integer  "landing_id"
+    t.string   "integration"
+    t.string   "integration_offer"
     t.index ["landing_id"], name: "index_campaigns_on_landing_id", using: :btree
     t.index ["offer_id"], name: "index_campaigns_on_offer_id", using: :btree
     t.index ["parent_id"], name: "index_campaigns_on_parent_id", using: :btree
