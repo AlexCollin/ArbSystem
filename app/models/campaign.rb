@@ -5,6 +5,7 @@ class Campaign < ApplicationRecord
   has_many :histories, foreign_key: 'parent_id', class_name: 'Campaign'
   has_and_belongs_to_many :creatives
   has_one :parent, foreign_key: 'parent_id', class_name: 'Campaign'
+  belongs_to :landing
   belongs_to :source
   belongs_to :offer
 

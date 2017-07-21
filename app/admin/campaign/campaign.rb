@@ -1,7 +1,7 @@
 ActiveAdmin.register Campaign do
   includes :clicks, :conversions
   permit_params :name, :description, :adv_type, :adv_type, :payment_model, :history_action,
-                :traffic_cost, :lead_cost, :incremental_views, :offer_id, :source_id, :views_count,
+                :traffic_cost, :lead_cost, :incremental_views, :offer_id, :source_id, :landing_id, :views_count,
                 creative_ids: []
 
   scope 'Parents', default: true do |scope|
@@ -63,6 +63,9 @@ ActiveAdmin.register Campaign do
     column :source do |row|
       link_to row.source.name, admin_source_path(row.source_id)
     end
+    column :landing do |row|
+      link_to row.landing.name, admin_source_path(row.landing_id)
+    end
     column 'Profit' do |row|
       if row.payment_model == 'cpc'
         span ((row.conversions.approved.count.to_f * row.lead_cost.to_f).to_f-
@@ -97,6 +100,7 @@ ActiveAdmin.register Campaign do
       end
       row :offer
       row :source
+      row :landing
     end
     panel 'Creatives' do
       table_for s.creatives do
@@ -322,6 +326,7 @@ ActiveAdmin.register Campaign do
             f.inputs do
               f.input :offer_id, as: :select, :collection => Offer.all.map { |o| [o.name, o.id] }, :include_blank => false
               f.input :source_id, as: :select, :collection => Source.all.map { |o| [o.name, o.id] }, :include_blank => false
+              f.input :landing_id, as: :select, :collection => Landing.all.map { |o| [o.name, o.id] }, :include_blank => false
             end
           else
             if f.object.incremental_views
