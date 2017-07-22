@@ -45,6 +45,11 @@ ActiveAdmin.register Campaign do
   end
 
   index :row_class => -> record { 'index_table_working_campaigns' unless record.parent_id } do
+    tabs do
+      tab 'Основные' do
+
+      end
+    end
     selectable_column
     column :id
     column :name
@@ -142,32 +147,60 @@ ActiveAdmin.register Campaign do
           views_count
         end
         column 'CTR' do
-          span (clicks.to_f / views_count.to_f).round(3).to_s + '%'
+          if clicks > 0
+            span (clicks.to_f / views_count.to_f).round(3).to_s + '%'
+          else
+            span '-'
+          end
         end
         column 'EPC' do
-          all = money_approve.to_f + money_wait.to_f
-          span (all.to_f / clicks.to_f).round(2).to_s + '₽'
+          if clicks > 0
+            all = money_approve.to_f + money_wait.to_f
+            span (all.to_f / clicks.to_f).round(2).to_s + '₽'
+          else
+            span '-'
+          end
         end
         column 'REPC' do
-          span (money_approve.to_f / clicks.to_f).round(2).to_s + '₽'
+          if clicks > 0
+            span (money_approve.to_f / clicks.to_f).round(2).to_s + '₽'
+          else
+            span '-'
+          end
         end
         column 'CEPC' do
-          if s.payment_model == 'cpc'
-            span ((money_approve.to_f - (clicks.to_f * s.traffic_cost.to_f))).round(2).to_s + '₽'
+          if clicks > 0
+            if s.payment_model == 'cpc'
+              span ((money_approve.to_f - (clicks.to_f * s.traffic_cost.to_f))).round(2).to_s + '₽'
+            else
+              span '-'
+            end
           else
             span '-'
           end
         end
         column 'EPM' do
-          all = money_approve.to_f + money_wait.to_f
-          span (all.to_f / views_count.to_f).round(2).to_s + '₽'
+          if views_count > 0
+            all = money_approve.to_f + money_wait.to_f
+            span (all.to_f / views_count.to_f).round(2).to_s + '₽'
+          else
+            span '-'
+          end
         end
         column 'REPM' do
-          span (money_approve.to_f / views_count.to_f).round(2).to_s + '₽'
+          if views_count > 0
+            span (money_approve.to_f / views_count.to_f).round(2).to_s + '₽'
+          else
+            span '-'
+          end
         end
         column 'CEPM' do
-          if s.payment_model == 'cpm'
-            span ((money_approve.to_f - ((views_count.to_f/1000) * s.traffic_cost.to_f))).round(2).to_s + '₽'
+          if views_count > 0
+            if s.payment_model == 'cpm'
+              span ((money_approve.to_f - ((views_count.to_f/1000) * s.traffic_cost.to_f))).round(2).to_s + '₽'
+            else
+              span '-'
+            end
           else
             span '-'
           end
