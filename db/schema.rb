@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170722084505) do
+ActiveRecord::Schema.define(version: 20170722100430) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -54,7 +54,7 @@ ActiveRecord::Schema.define(version: 20170722084505) do
     t.string   "payment_model"
     t.float    "traffic_cost"
     t.float    "lead_cost"
-    t.integer  "views_count"
+    t.integer  "views"
     t.datetime "created_at",                       null: false
     t.datetime "updated_at",                       null: false
     t.integer  "offer_id"
@@ -63,10 +63,22 @@ ActiveRecord::Schema.define(version: 20170722084505) do
     t.integer  "landing_id"
     t.string   "integration"
     t.string   "integration_offer"
+    t.integer  "total_views"
     t.index ["landing_id"], name: "index_campaigns_on_landing_id", using: :btree
     t.index ["offer_id"], name: "index_campaigns_on_offer_id", using: :btree
     t.index ["parent_id"], name: "index_campaigns_on_parent_id", using: :btree
     t.index ["source_id"], name: "index_campaigns_on_source_id", using: :btree
+  end
+
+  create_table "campaigns_creatives", force: :cascade do |t|
+    t.integer  "views"
+    t.integer  "total_views"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.integer  "campaign_id"
+    t.integer  "creative_id"
+    t.index ["campaign_id"], name: "index_campaigns_creatives_on_campaign_id", using: :btree
+    t.index ["creative_id"], name: "index_campaigns_creatives_on_creative_id", using: :btree
   end
 
   create_table "categories", force: :cascade do |t|
@@ -104,11 +116,9 @@ ActiveRecord::Schema.define(version: 20170722084505) do
     t.string   "utm_content"
     t.string   "utm_term"
     t.integer  "campaign_id"
-    t.integer  "history_id"
     t.integer  "creative_id"
     t.index ["campaign_id"], name: "index_clicks_on_campaign_id", using: :btree
     t.index ["creative_id"], name: "index_clicks_on_creative_id", using: :btree
-    t.index ["history_id"], name: "index_clicks_on_history_id", using: :btree
     t.index ["visitor_id"], name: "index_clicks_on_visitor_id", using: :btree
   end
 
@@ -127,10 +137,8 @@ ActiveRecord::Schema.define(version: 20170722084505) do
     t.datetime "updated_at",     null: false
     t.integer  "visitor_id"
     t.integer  "campaign_id"
-    t.integer  "history_id"
     t.index ["campaign_id"], name: "index_conversions_on_campaign_id", using: :btree
     t.index ["click_id"], name: "index_conversions_on_click_id", using: :btree
-    t.index ["history_id"], name: "index_conversions_on_history_id", using: :btree
     t.index ["visitor_id"], name: "index_conversions_on_visitor_id", using: :btree
   end
 
@@ -145,11 +153,6 @@ ActiveRecord::Schema.define(version: 20170722084505) do
     t.string   "image_content_type"
     t.integer  "image_file_size"
     t.datetime "image_updated_at"
-    t.integer  "campaign_id"
-    t.integer  "history_id"
-    t.integer  "views_count"
-    t.index ["campaign_id"], name: "index_creatives_on_campaign_id", using: :btree
-    t.index ["history_id"], name: "index_creatives_on_history_id", using: :btree
     t.index ["offer_id"], name: "index_creatives_on_offer_id", using: :btree
   end
 

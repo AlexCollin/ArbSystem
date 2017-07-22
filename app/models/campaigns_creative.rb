@@ -1,0 +1,2 @@
+class CampaignsCreative < ApplicationRecord
+end
