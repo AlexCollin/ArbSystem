@@ -42,7 +42,7 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
   # end
   before_filter :only => [:index] do
     if params['campaign_id'].blank? and (not params['q'] or params['q']['campaign_id_eq'].blank?)
-      params['q'] = {'campaign_id_eq' => Campaign.workings.last.id}
+      params['q'] = {'campaign_id_eq' => Campaign.workings&.last&.id || ''}
     end
   end
 
