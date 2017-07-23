@@ -2,6 +2,8 @@ class Conversion < ApplicationRecord
   belongs_to :click
   belongs_to :visitor
   belongs_to :campaign
+  belongs_to :working_campaign, foreign_key: 'working_campaign_id', class_name: 'Campaign'
+  belongs_to :creative
 
   after_save :send_postback
 

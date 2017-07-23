@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170722101242) do
+ActiveRecord::Schema.define(version: 20170723094414) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -73,12 +73,14 @@ ActiveRecord::Schema.define(version: 20170722101242) do
   create_table "campaigns_creatives", force: :cascade do |t|
     t.integer  "views"
     t.integer  "total_views"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
     t.integer  "campaign_id"
     t.integer  "creative_id"
+    t.integer  "working_campaign_id"
     t.index ["campaign_id"], name: "index_campaigns_creatives_on_campaign_id", using: :btree
     t.index ["creative_id"], name: "index_campaigns_creatives_on_creative_id", using: :btree
+    t.index ["working_campaign_id"], name: "index_campaigns_creatives_on_working_campaign_id", using: :btree
   end
 
   create_table "categories", force: :cascade do |t|
@@ -106,8 +108,8 @@ ActiveRecord::Schema.define(version: 20170722101242) do
     t.string   "s7"
     t.string   "s8"
     t.string   "s9"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
     t.integer  "visitor_id"
     t.integer  "activity"
     t.string   "utm_source"
@@ -117,9 +119,11 @@ ActiveRecord::Schema.define(version: 20170722101242) do
     t.string   "utm_term"
     t.integer  "campaign_id"
     t.integer  "creative_id"
+    t.integer  "working_campaign_id"
     t.index ["campaign_id"], name: "index_clicks_on_campaign_id", using: :btree
     t.index ["creative_id"], name: "index_clicks_on_creative_id", using: :btree
     t.index ["visitor_id"], name: "index_clicks_on_visitor_id", using: :btree
+    t.index ["working_campaign_id"], name: "index_clicks_on_working_campaign_id", using: :btree
   end
 
   create_table "conversions", force: :cascade do |t|
@@ -133,15 +137,17 @@ ActiveRecord::Schema.define(version: 20170722101242) do
     t.string   "ext_id"
     t.string   "ext_comment"
     t.string   "ext_payout"
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
     t.integer  "visitor_id"
     t.integer  "campaign_id"
     t.integer  "creative_id"
+    t.integer  "working_campaign_id"
     t.index ["campaign_id"], name: "index_conversions_on_campaign_id", using: :btree
     t.index ["click_id"], name: "index_conversions_on_click_id", using: :btree
     t.index ["creative_id"], name: "index_conversions_on_creative_id", using: :btree
     t.index ["visitor_id"], name: "index_conversions_on_visitor_id", using: :btree
+    t.index ["working_campaign_id"], name: "index_conversions_on_working_campaign_id", using: :btree
   end
 
   create_table "creatives", force: :cascade do |t|

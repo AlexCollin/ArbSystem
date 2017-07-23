@@ -93,7 +93,7 @@ ActiveAdmin.register Campaign do
           row :traffic_cost
           row :lead_cost
           row 'Self views' do
-            s.views_count
+            s.views
           end
           if s.parent_id
             row :parent_id
@@ -129,6 +129,9 @@ ActiveAdmin.register Campaign do
           money_approve = (approve * s.lead_cost).to_i
           money_wait = (wait * s.lead_cost).to_i
           money_decline = (decline * s.lead_cost).to_i
+          # raw table_for_campaign(s, clicks, s.clicks.count('activity'), s.clicks.sum('amount'),
+          #                        views, s.traffic_cost, false, approve, decline, wait, money_wait,
+          #                        money_approve, money_decline)
           table_for s do
             column 'Name' do
               link_to s.name, admin_campaign_path(s.id)
@@ -227,14 +230,12 @@ ActiveAdmin.register Campaign do
         end
         unless s.parent_id
           panel 'Splited Statistics' do
-            childs = Campaign.joins('LEFT JOIN clicks as cl ON (campaigns.id = cl.campaign_id AND cl.history_id IS NULL) OR
-                     campaigns.id = cl.history_id')
-                         .left_outer_joins(:conversions).select(
+            childs = Campaign.left_outer_joins(:clicks,:conversions).select(
                 'campaigns.id, campaigns.name, campaigns.parent_id, campaigns.created_at',
-                'campaigns.payment_model, campaigns.traffic_cost, campaigns.views_count',
-                'sum(case when cl.amount > 0 then 1 else 0 end) clicks_count',
-                'sum(case when cl.activity::int > 0 then 1 else 0 end) actives_count',
-                'sum(case when cl.amount > 0 then cl.amount else 0 end) hits_count',
+                'campaigns.payment_model, campaigns.traffic_cost, campaigns.views, campaigns.total_views',
+                'sum(case when clicks.amount > 0 then 1 else 0 end) clicks_count',
+                'sum(case when clicks.activity::int > 0 then 1 else 0 end) actives_count',
+                'sum(case when clicks.amount > 0 then clicks.amount else 0 end) hits_count',
                 'sum(case when conversions.status = 0 then 1 else 0 end) conversions_wait',
                 'sum(case when conversions.status = 1 then 1 else 0 end) conversions_approve',
                 'sum(case when conversions.status = 2 then 1 else 0 end) conversions_decline',
@@ -266,17 +267,17 @@ ActiveAdmin.register Campaign do
                 span row.hits_count
               end
               column 'Views' do |row|
-                span row.views_count.to_s
+                span row.views.to_s
               end
               column 'CTR' do |row|
-                if row.views_count > 0 and row.clicks_count > 0
-                  span (row.clicks_count.to_f / row.views_count.to_f).round(3).to_s + '%'
+                if row.views > 0 and row.clicks_count > 0
+                  span (row.clicks_count.to_f / row.views.to_f).round(3).to_s + '%'
                 else
                   span '-'
                 end
               end
               column 'EPC' do |row|
-                if row.views_count > 0 and row.clicks_count > 0
+                if row.clicks_count > 0
                   all = row.conversions_money_approve.to_f + row.conversions_money_wait.to_f
                   span (all.to_f / row.clicks_count.to_f).round(2).to_s + '₽'
                 else
@@ -284,37 +285,37 @@ ActiveAdmin.register Campaign do
                 end
               end
               column 'REPC' do |row|
-                if row.views_count > 0 and row.clicks_count > 0
+                if row.views > 0 and row.clicks_count > 0
                   span (row.conversions_money_approve.to_f / row.clicks_count.to_f).round(2).to_s + '₽'
                 else
                   span '-'
                 end
               end
               column 'CEPC' do |row|
-                if row.views_count > 0 and row.payment_model == 'cpc' and row.clicks_count > 0
+                if row.views > 0 and row.payment_model == 'cpc' and row.clicks_count > 0
                   span (row.conversions_money_approve.to_f - (row.clicks_count.to_f * row.traffic_cost.to_f)).round(2).to_s + '₽'
                 else
                   span '-'
                 end
               end
               column 'EPM' do |row|
-                if row.views_count > 0
+                if row.views > 0
                   all = row.conversions_money_approve.to_f + row.conversions_money_wait.to_f
-                  span (all.to_f / row.views_count.to_f).round(2).to_s + '₽'
+                  span (all.to_f / row.views.to_f).round(2).to_s + '₽'
                 else
                   span '-'
                 end
               end
               column 'REPM' do |row|
-                if row.views_count > 0
-                  span (row.conversions_money_approve.to_f / row.views_count.to_f).round(2).to_s + '₽'
+                if row.views > 0
+                  span (row.conversions_money_approve.to_f / row.views.to_f).round(2).to_s + '₽'
                 else
                   span '-'
                 end
               end
               column 'CEPM' do |row|
-                if row.views_count > 0 and row.payment_model == 'cpm'
-                  span (row.conversions_money_approve.to_f - ((row.views_count.to_f/1000) * row.traffic_cost.to_f)).round(2).to_s + '₽'
+                if row.views > 0 and row.payment_model == 'cpm'
+                  span (row.conversions_money_approve.to_f - ((row.views.to_f/1000) * row.traffic_cost.to_f)).round(2).to_s + '₽'
                 else
                   span '-'
                 end
@@ -384,15 +385,16 @@ ActiveAdmin.register Campaign do
           f.input :integration_offer
         end
       end
-      unless f.object.new_record?
-        tab 'Креативы' do
-          f.inputs do
-            # f.has_many :creatives, as: :check_boxes, new_record: true do |t|
-            #     t.input :id
-            # end
-            f.input :creatives, as: :check_boxes do |row|
-              row.input :id, as: :check_boxes
-            end
+      tab 'Креативы' do
+        f.inputs do
+          # f.has_many :creatives, as: :check_boxes, new_record: true do |t|
+          #     t.input :id
+          # end
+          # f.input :creatives, as: :check_boxes do |row|
+          #   row.input :id, as: :check_boxes
+          f.has_many :campaigns_creatives, new_record: true, allow_destroy: true do |cf|
+            cf.input :creative_id, as: :select, :collection => Creative.all.map { |o| [o.title, o.id] }, :include_blank => false
+            cf.input :views
           end
         end
       end

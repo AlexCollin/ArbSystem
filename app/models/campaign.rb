@@ -1,8 +1,9 @@
 class Campaign < ApplicationRecord
   has_many :clicks
-  has_many :history_clicks, foreign_key: 'history_id', class_name: 'Click'
   has_many :conversions
   has_many :histories, foreign_key: 'parent_id', class_name: 'Campaign'
+  has_many :campaigns_creatives, foreign_key: 'campaign_id'
+  #has_many :creatives, through: :campaigns_creatives, foreign_key: 'creative_id'
   has_and_belongs_to_many :creatives
   has_one :parent, foreign_key: 'parent_id', class_name: 'Campaign'
   belongs_to :landing
@@ -10,6 +11,8 @@ class Campaign < ApplicationRecord
   belongs_to :offer
 
   attr_accessor :history_action
+
+  accepts_nested_attributes_for :campaigns_creatives
 
   # enum payment_model: [ :cpc, :cpm]
 
@@ -19,7 +22,7 @@ class Campaign < ApplicationRecord
   before_save :default_values
 
   def default_values
-    self.views_count ||= 0
+    self.views ||= 0
   end
 
   scope :workings, -> { where('parent_id IS NULL') }
@@ -62,11 +65,11 @@ class Campaign < ApplicationRecord
     histories = Campaign.where({:parent_id => self.id, :incremental_views => true}).all
     if histories
       histories.each do |h|
-        total_views += h.views_count
+        total_views += h.views
       end
     end
     if with_self
-      total_views + self.views_count
+      total_views + self.views
     else
       total_views
     end

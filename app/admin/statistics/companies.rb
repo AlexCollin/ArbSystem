@@ -5,9 +5,9 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
 
   menu parent: "Statistics", label: 'Campaigns'
   scope 'Coefficients', default: true do |scope|
-    scope.select('clicks.campaign_id, clicks.history_id')
-        .group('clicks.history_id').group('clicks.campaign_id')
-        .reorder('clicks.campaign_id DESC, clicks.history_id DESC')
+    scope.select('clicks.campaign_id')
+        .group('campaigns.parent_id').group('clicks.campaign_id')
+        .reorder('clicks.campaign_id DESC')
   end
   # scope 's2' do |scope|
   #   scope.select('s2').group('clicks.s2').reorder('s2')
@@ -80,27 +80,18 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
     column :hits
     column 'Views' do |row|
       if row.campaign
-        if row.history_id
-          span row.history.views_count.to_s
-        else
-          span row.campaign.views_count.to_s
-        end
+        span row.campaign.views.to_s
       else
         span '-'
       end
     end
     column 'CTR' do |row|
-      if row.campaign and row.clicks > 0
-        if row.history_id and row.history.views_count > 0
-          span (row.clicks.to_f / row.history.views_count.to_f).round(3).to_s + '%'
-        elsif row.campaign.views_count > 0
-          span (row.clicks.to_f / row.campaign.views_count.to_f).round(3).to_s + '%'
-        else
-          span '-'
-        end
+      if row.clicks > 0 and row.campaign.views > 0
+        span (row.clicks.to_f / row.campaign.views.to_f).round(3).to_s + '%'
       else
         span '-'
       end
+
     end
     column 'EPC' do |row|
       if row.clicks > 0
@@ -119,60 +110,33 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
     end
     column 'CEPC' do |row|
       if row.clicks > 0 and row.campaign and row.campaign.payment_model == 'cpc'
-          span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
-              row.clicks.to_f).round(2).to_s + '₽'
+        span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
+            row.clicks.to_f).round(2).to_s + '₽'
       else
         span '-'
       end
     end
     column 'EPM' do |row|
-      if row.history_id
-        if row.history.views_count.to_i > 0
-          all = row.money_approve.to_f + row.money_wait.to_f
-          span (all.to_f / row.history.views_count.to_f).round(2).to_s + '₽'
-        else
-          span '-'
-        end
+      if row.campaign.views.to_i > 0
+        all = row.money_approve.to_f + row.money_wait.to_f
+        span (all.to_f / row.campaign.views.to_f).round(2).to_s + '₽'
       else
-        if row.campaign.views_count.to_i > 0
-          all = row.money_approve.to_f + row.money_wait.to_f
-          span (all.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
-        else
-          span '-'
-        end
+        span '-'
       end
-      span
     end
     column 'REPM' do |row|
-      if row.history_id
-        if row.history.views_count > 0
-          span (row.money_approve.to_f / row.history.views_count.to_f).round(2).to_s + '₽'
-        else
-          span '-'
-        end
+      if row.campaign.views > 0
+        span (row.money_approve.to_f / row.campaign.views.to_f).round(2).to_s + '₽'
       else
-        if row.campaign.views_count > 0
-          span (row.money_approve.to_f / row.campaign.views_count.to_f).round(2).to_s + '₽'
-        else
-          span '-'
-        end
+        span '-'
       end
     end
     column 'CEPM' do |row|
-      if row.history_id
-        if row.history and row.history.views_count > 0  and row.history.payment_model == 'cpm'
-          cost = (row.history.views_count.to_f/1000).to_f * row.history.traffic_cost.to_f
-          span ((row.money_approve.to_f - cost).round(2)).to_s + '₽'
-        else
-          span '-'
-        end
+      if row.campaign and row.campaign.views > 0 and row.campaign.payment_model == 'cpm'
+        cost = (row.campaign.views.to_f/1000).to_f * row.campaign.traffic_cost.to_f
+        span ((row.money_approve.to_f - cost).round(2)).to_s + '₽'
       else
-        if row.campaign and row.campaign.views_count > 0  and row.campaign.payment_model == 'cpm'
-          cost = (row.campaign.views_count.to_f/1000).to_f * row.campaign.traffic_cost.to_f
-          span ((row.money_approve.to_f - cost).round(2)).to_s + '₽'
-        else
-          span '-'
-        end
+        span '-'
       end
     end
     column 'CR' do |row|
@@ -198,8 +162,9 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
 
   controller do
     def scoped_collection
-      Click.left_outer_joins(:conversions)
+      Click.left_outer_joins(:conversions, :campaign)
           .select(
+              'campaigns.parent_id as history_id',
               'sum(case when clicks.amount > 0 then 1 else 0 end) clicks',
               'sum(case when clicks.activity::int > 0 then 1 else 0 end) actives',
               'sum(case when clicks.amount > 0 then clicks.amount else 0 end) hits',
