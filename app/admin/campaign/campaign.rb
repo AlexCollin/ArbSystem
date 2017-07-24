@@ -16,31 +16,35 @@ ActiveAdmin.register Campaign do
 
     def update(options={}, &block)
       campaign = Campaign.find(params[:id])
-      orig_history_views = campaign.get_views_count_from_history(true)
-      orig_views_count = params[:campaign][:views].to_i
+      orig_history_views = campaign.get_views_count_from_history(false)
+      orig_views_count = params[:campaign][:views].to_i - orig_history_views
       orig_campaigns_creatives = params[:campaign][:campaigns_creatives_attributes].dup
 
-      params[:campaign][:campaigns_creatives_attributes].each do |index|
-        cca = params[:campaign][:campaigns_creatives_attributes][index]
-        history_ca = CampaignsCreative.get_total_views(cca[:creative_id], campaign.id)
-        orig_campaigns_creatives[index][:views] = cca[:views].to_i - history_ca
-        orig_campaigns_creatives[index][:total_views] = cca[:views]
-        cca[:total_views] = cca[:views]
+      orig_campaigns_creatives.each do |index|
+        cca = orig_campaigns_creatives[index]
+        history_ca = CampaignsCreative.get_total_views(cca[:creative_id], campaign.id, false)
+
+        if params[:campaign][:calculate_views_on_creatives] == 'true'
+          orig_views_count += cca[:views].to_i
+          orig_history_views += history_ca + cca[:views].to_i
+        end
+
+        cca[:views] = cca[:views].to_i - history_ca
+        cca[:total_views] = cca[:views].to_i
+
+        ccm = params[:campaign][:campaigns_creatives_attributes][index]
+        ccm[:views] = cca[:views].to_i - history_ca
+        ccm[:total_views] = ccm[:views]
       end
-      params[:campaign][:total_views] = orig_views_count
+
+
+      params[:campaign][:total_views] = orig_history_views
+      params[:campaign][:views] = orig_views_count
 
       if params[:campaign][:history_action] == 'create'
         params[:campaign][:views] = 0
         params[:campaign][:campaigns_creatives_attributes].each do |index|
-          cca = params[:campaign][:campaigns_creatives_attributes][index]
-          cca[:views] = 0
-        end
-      else
-        params[:campaign][:views] = orig_views_count - orig_history_views
-        params[:campaign][:campaigns_creatives_attributes].each do |index|
-          cca = params[:campaign][:campaigns_creatives_attributes][index]
-          cca[:views] = cca[:views].to_i - CampaignsCreative.get_total_views(
-              cca[:creative_id], campaign.id)
+          params[:campaign][:campaigns_creatives_attributes][index][:views] = 0
         end
       end
 
@@ -49,7 +53,7 @@ ActiveAdmin.register Campaign do
           if params[:campaign][:history_action] == 'create'
             history = campaign.dup
             history.parent_id = campaign.id
-            history.views = orig_views_count - orig_history_views
+            history.views = orig_views_count
             history.total_views = orig_history_views
             history.save
 
@@ -134,7 +138,7 @@ ActiveAdmin.register Campaign do
             row :parent_id
           else
             row 'Total Views' do
-              span s.get_views_count_from_history(true)
+              span s.total_views
             end
           end
           row :integration

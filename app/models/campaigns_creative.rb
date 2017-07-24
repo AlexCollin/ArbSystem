@@ -37,4 +37,11 @@ class CampaignsCreative < ApplicationRecord
     cc.get_total_views(with_parent)
   end
 
+  def self.get_total_views_by_campaign(campaign, with_parent = false)
+    cc = CampaignsCreative.new
+    cc.creative_id = creative.to_i
+    cc.working_campaign_id = campaign.to_i
+    cc.get_total_views(with_parent)
+  end
+
 end
