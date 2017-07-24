@@ -74,6 +74,9 @@ ActiveAdmin.register Campaign do
                   :working_campaign_id => campaign.id
               ).save
             end
+
+            Click.where(:campaign_id => campaign.id).update_all(campaign_id: history.id)
+            Conversion.where(:campaign_id => campaign.id).update_all(campaign_id: history.id)
           end
         end
         block.call(success, failure) if block

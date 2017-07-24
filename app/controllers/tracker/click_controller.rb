@@ -31,6 +31,7 @@ class Tracker::ClickController < Tracker::TrackerController
       click.s8 = params[:s8] if params[:s8]
       click.s9 = params[:s9] if params[:s9]
       click.campaign_id = params[:campaign].to_i if params[:campaign].to_i
+      click.creative_id = params[:creative].to_i if params[:creative].to_i
       if click.save
         $hits_cache.set(hit_ident, click.id, {ex: 1.day})
         render json: click
