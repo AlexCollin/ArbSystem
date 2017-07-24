@@ -1,7 +1,7 @@
 class Creative < ApplicationRecord
   belongs_to :offer
-  has_many :campaigns_creatives
-  has_many :campaigns, :through => :campaigns_creatives
+  has_many :campaigns_creatives, foreign_key: 'creative_id', class_name: 'CampaignsCreative'
+  has_and_belongs_to_many :campaigns, foreign_key: 'campaign_id', class_name: 'Campaign'
   #has_and_belongs_to_many :campaigns
   has_and_belongs_to_many :working_campaigns, foreign_key: 'working_campaign_id', class_name: 'Campaign'
   # accepts_nested_attributes_for :campaigns_creatives

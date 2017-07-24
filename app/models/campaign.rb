@@ -2,17 +2,17 @@ class Campaign < ApplicationRecord
   has_many :clicks
   has_many :conversions
   has_many :histories, foreign_key: 'parent_id', class_name: 'Campaign'
-  has_many :campaigns_creatives, foreign_key: 'campaign_id'
-  #has_many :creatives, through: :campaigns_creatives, foreign_key: 'creative_id'
-  has_and_belongs_to_many :creatives
-  has_one :parent, foreign_key: 'parent_id', class_name: 'Campaign'
-  belongs_to :landing
+  has_many :campaigns_creatives
+  has_many :creatives, through: :campaigns_creatives, foreign_key: 'creative_id'
+  # has_and_belongs_to_many :creatives
+  belongs_to :parent, foreign_key: 'parent_id', class_name: 'Campaign', optional: true
+  belongs_to :landing, optional: true
   belongs_to :source
   belongs_to :offer
 
   attr_accessor :history_action
 
-  accepts_nested_attributes_for :campaigns_creatives
+  accepts_nested_attributes_for :campaigns_creatives, allow_destroy: true
 
   # enum payment_model: [ :cpc, :cpm]
 
@@ -26,7 +26,7 @@ class Campaign < ApplicationRecord
   end
 
   scope :workings, -> { where('parent_id IS NULL') }
-  scope :histories, -> { where('parent_id IS NOT NULL') }
+  scope :histories, -> { where('working_campaign_id IS NOT NULL') }
 
   def to_s
     self.name
@@ -45,22 +45,7 @@ class Campaign < ApplicationRecord
     {:waiting => waiting(payout), :approved => approved(payout), :declined => declined(payout)}
   end
 
-  def make_history(views_count, creatives)
-    history = self.dup
-    history.parent_id = self.id
-    history.views_count = views_count
-    history.creatives << creatives
-    if history.save
-      Click.where(history_id: nil, campaign_id: self.id)
-          .update_all(history_id: history.id)
-      Conversion.where(history_id: nil, campaign_id: self.id)
-          .update_all(history_id: history.id)
-      history
-    end
-
-  end
-
-  def get_views_count_from_history(with_self=false)
+  def get_views_count_from_history(with_self = false)
     total_views = 0
     histories = Campaign.where({:parent_id => self.id, :incremental_views => true}).all
     if histories

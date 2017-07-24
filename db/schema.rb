@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170723094414) do
+ActiveRecord::Schema.define(version: 20170724071214) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -50,13 +50,13 @@ ActiveRecord::Schema.define(version: 20170723094414) do
     t.string   "name"
     t.text     "description"
     t.string   "adv_type"
-    t.boolean  "incremental_views", default: true
+    t.boolean  "incremental_views",            default: true
     t.string   "payment_model"
     t.float    "traffic_cost"
     t.float    "lead_cost"
     t.integer  "views"
-    t.datetime "created_at",                       null: false
-    t.datetime "updated_at",                       null: false
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",                                  null: false
     t.integer  "offer_id"
     t.integer  "source_id"
     t.integer  "parent_id"
@@ -64,8 +64,9 @@ ActiveRecord::Schema.define(version: 20170723094414) do
     t.string   "integration"
     t.string   "integration_offer"
     t.integer  "total_views"
+    t.boolean  "calculate_views_on_creatives", default: true
     t.index ["landing_id"], name: "index_campaigns_on_landing_id", using: :btree
-    t.index ["offer_id"], name: "index_campaigns_on_offer_id", using: :btree
+    t.index ["offer_id"], name: "index_campaigns_on_offers_id", using: :btree
     t.index ["parent_id"], name: "index_campaigns_on_parent_id", using: :btree
     t.index ["source_id"], name: "index_campaigns_on_source_id", using: :btree
   end
@@ -89,8 +90,8 @@ ActiveRecord::Schema.define(version: 20170723094414) do
   end
 
   create_table "categories_offers", id: false, force: :cascade do |t|
-    t.integer "category_id", null: false
     t.integer "offer_id",    null: false
+    t.integer "category_id", null: false
     t.index ["category_id"], name: "index_categories_offers_on_category_id", using: :btree
     t.index ["offer_id"], name: "index_categories_offers_on_offer_id", using: :btree
   end
@@ -108,8 +109,8 @@ ActiveRecord::Schema.define(version: 20170723094414) do
     t.string   "s7"
     t.string   "s8"
     t.string   "s9"
-    t.datetime "created_at",          null: false
-    t.datetime "updated_at",          null: false
+    t.datetime "created_at",          precision: 6
+    t.datetime "updated_at",          precision: 6
     t.integer  "visitor_id"
     t.integer  "activity"
     t.string   "utm_source"

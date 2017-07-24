@@ -1,8 +1,9 @@
 ActiveAdmin.register Campaign do
   includes :clicks, :conversions
   permit_params :name, :description, :adv_type, :adv_type, :payment_model, :history_action, :integration,
-                :traffic_cost, :lead_cost, :incremental_views, :offer_id, :source_id, :landing_id, :views_count,
-                :integration_offer, creative_ids: []
+                :traffic_cost, :lead_cost, :incremental_views, :offer_id, :source_id, :landing_id, :views,
+                :integration_offer, :calculate_views_on_creatives, :total_views, creative_ids: [],
+                campaigns_creatives_attributes: [:creative_id, :views, :total_views, :id, :_destroy]
 
   scope 'Parents', default: true do |scope|
     scope.where(:parent_id => nil)
@@ -15,20 +16,53 @@ ActiveAdmin.register Campaign do
 
     def update(options={}, &block)
       campaign = Campaign.find(params[:id])
-      orig_creatives = campaign.creatives.dup
-      orig_views_count = params[:campaign][:views_count].to_i
-      if params[:campaign][:incremental_views] == 'true' and params[:campaign][:views_count].to_i > 0
-        orig_views_count = params[:campaign][:views_count].to_i - campaign.get_views_count_from_history
+      orig_history_views = campaign.get_views_count_from_history(true)
+      orig_views_count = params[:campaign][:views].to_i
+      orig_campaigns_creatives = params[:campaign][:campaigns_creatives_attributes].dup
+
+      params[:campaign][:campaigns_creatives_attributes].each do |index|
+        cca = params[:campaign][:campaigns_creatives_attributes][index]
+        history_ca = CampaignsCreative.get_total_views(cca[:creative_id], campaign.id)
+        orig_campaigns_creatives[index][:views] = cca[:views].to_i - history_ca
+        orig_campaigns_creatives[index][:total_views] = cca[:views]
+        cca[:total_views] = cca[:views]
       end
+      params[:campaign][:total_views] = orig_views_count
+
       if params[:campaign][:history_action] == 'create'
-        params[:campaign][:views_count] = 0
+        params[:campaign][:views] = 0
+        params[:campaign][:campaigns_creatives_attributes].each do |index|
+          cca = params[:campaign][:campaigns_creatives_attributes][index]
+          cca[:views] = 0
+        end
       else
-        params[:campaign][:views_count] = orig_views_count
+        params[:campaign][:views] = orig_views_count - orig_history_views
+        params[:campaign][:campaigns_creatives_attributes].each do |index|
+          cca = params[:campaign][:campaigns_creatives_attributes][index]
+          cca[:views] = cca[:views].to_i - CampaignsCreative.get_total_views(
+              cca[:creative_id], campaign.id)
+        end
       end
+
       super do |success, failure|
         unless success.class.nil?
-          if params[:campaign][:history_action] == 'create' and campaign.parent_id.nil?
-            campaign.make_history(orig_views_count, orig_creatives)
+          if params[:campaign][:history_action] == 'create'
+            history = campaign.dup
+            history.parent_id = campaign.id
+            history.views = orig_views_count - orig_history_views
+            history.total_views = orig_history_views
+            history.save
+
+            orig_campaigns_creatives.each do |c|
+              occ = orig_campaigns_creatives[c]
+              history.campaigns_creatives.create(
+                  :views => occ[:views].to_i,
+                  :total_views => occ[:total_views].to_i,
+                  :campaign_id => history.id,
+                  :creative_id => occ[:creative_id].to_i,
+                  :working_campaign_id => campaign.id
+              ).save
+            end
           end
         end
         block.call(success, failure) if block
@@ -54,7 +88,7 @@ ActiveAdmin.register Campaign do
     column :payment_model
     column :traffic_cost
     column :lead_cost
-    column :views_count do |row|
+    column :views do |row|
       span row.get_views_count_from_history(true)
     end
     column :integration
@@ -89,6 +123,7 @@ ActiveAdmin.register Campaign do
           row :description
           row :adv_type
           row :incremental_views
+          row :calculate_views_on_creatives
           row :payment_model, as: :string
           row :traffic_cost
           row :lead_cost
@@ -109,12 +144,24 @@ ActiveAdmin.register Campaign do
           row :landing
         end
         panel 'Creatives' do
-          table_for s.creatives do
-            column :title
-            column :text
-            column :description
+          table_for s.campaigns_creatives do
+            column :title do |row|
+              span row.creative.title
+            end
+            column :text do |row|
+              span row.creative.text
+            end
+            column :description do |row|
+              span row.creative.description
+            end
+            column :total_views do |row|
+              span row.total_views
+            end
+            column :views do |row|
+              span row.views
+            end
             column 'Image' do |img|
-              image_tag(img.image.url(:thumb))
+              image_tag(img.creative.image.url(:thumb))
             end
           end
         end
@@ -230,7 +277,7 @@ ActiveAdmin.register Campaign do
         end
         unless s.parent_id
           panel 'Splited Statistics' do
-            childs = Campaign.left_outer_joins(:clicks,:conversions).select(
+            childs = Campaign.left_outer_joins(:clicks, :conversions).select(
                 'campaigns.id, campaigns.name, campaigns.parent_id, campaigns.created_at',
                 'campaigns.payment_model, campaigns.traffic_cost, campaigns.views, campaigns.total_views',
                 'sum(case when clicks.amount > 0 then 1 else 0 end) clicks_count',
@@ -358,8 +405,10 @@ ActiveAdmin.register Campaign do
           f.input :adv_type
           if f.object.new_record?
             f.input :incremental_views
+            f.input :calculate_views_on_creatives
           else
             f.input :incremental_views, as: :hidden
+            f.input :calculate_views_on_creatives, as: :hidden
           end
           f.input :payment_model, as: :select, :collection => {'Cost Per Click' => 'cpc', 'Cost Per Mile' => 'cpm'}, include_blank: true, allow_blank: false
           f.input :traffic_cost
@@ -371,10 +420,12 @@ ActiveAdmin.register Campaign do
               f.input :landing_id, as: :select, :collection => Landing.all.map { |o| [o.name, o.id] }, :include_blank => false
             end
           else
-            if f.object.incremental_views
-              f.input :views_count, :input_html => {:value => f.object.get_views_count_from_history(true)}
-            else
-              f.input :views_count
+            unless f.object.calculate_views_on_creatives
+              if f.object.incremental_views
+                f.input :views, :input_html => {:value => f.object.get_views_count_from_history(true)}
+              else
+                f.input :views
+              end
             end
           end
         end
@@ -393,8 +444,9 @@ ActiveAdmin.register Campaign do
           # f.input :creatives, as: :check_boxes do |row|
           #   row.input :id, as: :check_boxes
           f.has_many :campaigns_creatives, new_record: true, allow_destroy: true do |cf|
-            cf.input :creative_id, as: :select, :collection => Creative.all.map { |o| [o.title, o.id] }, :include_blank => false
-            cf.input :views
+            cf.input :id, as: :hidden
+            cf.input :creative_id, as: :select, :collection => Creative.all.map { |o| [o.title, o.id] }, :include_blank => true
+            cf.input :views, :input_html => {:value => cf.object.get_total_views(true)}
           end
         end
       end
