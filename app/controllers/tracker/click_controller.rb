@@ -2,7 +2,9 @@ class Tracker::ClickController < Tracker::TrackerController
 
   def create
     visitor = Visitor::get(params[:ip], params[:ua])
-    hit_ident = visitor.to_s + params[:ident].to_s
+    hit_ident = visitor.to_s
+    p 1111
+    p hit_ident
     hit = $hits_cache.get(hit_ident)
     if hit
       click = Click.find(hit.to_i)
