@@ -26,7 +26,7 @@ class Campaign < ApplicationRecord
   end
 
   scope :workings, -> { where('parent_id IS NULL') }
-  scope :histories, -> { where('working_campaign_id IS NOT NULL') }
+  scope :histories, -> { where('parent_id IS NOT NULL') }
 
   def to_s
     self.name

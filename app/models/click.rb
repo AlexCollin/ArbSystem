@@ -12,4 +12,8 @@ class Click < ApplicationRecord
   def default_values
     self.working_campaign_id ||= self.campaign_id
   end
+
+  def is_working_campaign
+    self.working_campaign_id == self.campaign_id
+  end
 end

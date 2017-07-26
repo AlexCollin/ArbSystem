@@ -5,9 +5,9 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
 
   menu parent: "Statistics", label: 'Campaigns'
   scope 'Coefficients', default: true do |scope|
-    scope.select('clicks.campaign_id')
-        .group('campaigns.parent_id').group('clicks.campaign_id')
-        .reorder('clicks.campaign_id DESC')
+    scope.select('clicks.campaign_id, clicks.working_campaign_id')
+        .group('clicks.campaign_id').group('clicks.working_campaign_id')
+        .reorder('clicks.campaign_id ASC, clicks.working_campaign_id ASC')
   end
   # scope 's2' do |scope|
   #   scope.select('s2').group('clicks.s2').reorder('s2')
@@ -41,39 +41,30 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
   #   end
   # end
   before_filter :only => [:index] do
-    if params['campaign_id'].blank? and (not params['q'] or params['q']['campaign_id_eq'].blank?)
-      params['q'] = {'campaign_id_eq' => Campaign.workings&.last&.id || ''}
+    if params['working_campaign_id'].blank? and (not params['q'] or params['q']['working_campaign_id_eq'].blank?)
+      params['q'] = {'working_campaign_id_eq' => Campaign.where('campaigns.parent_id IS NULL')&.last&.id || ''}
     end
   end
 
-  filter :campaign, :collection => Campaign.workings.map { |o| [o.name, o.id] }, :include_blank => false
+  filter :working_campaign, :collection => Campaign.where('campaigns.parent_id IS NULL').map { |o| [o.name, o.id] }, :include_blank => false
   filter :created_at
 
-  index :row_class => -> record { 'index_table_working_campaigns' unless record.history_id } do
+  index :row_class => -> record { 'index_table_working_campaigns' if record.working_campaign_id == record.campaign_id } do
     # scope = params[:scope]
     # unless scope
     #   scope = 'All'
     # end
     # column scope
     column :campaign do |row|
-      if row.campaign
-        if row.history_id
-          link_to "(#{row.history_id})-> #{row.history.created_at.strftime('%d.%m.%y')}", admin_campaign_path(row.history_id)
-        else
-          link_to row.campaign, admin_campaign_path(row.campaign_id)
-        end
+      unless row.is_working_campaign
+        link_to "(#{row.campaign_id})-> #{row.campaign.created_at.strftime('%d.%m.%y')}", admin_campaign_path(row.campaign_id)
+      else
+        link_to row.campaign, admin_campaign_path(row.campaign_id)
       end
     end
     column 'Model' do |row|
-      if row.campaign
-        if row.history_id
-          span "#{row.history.payment_model} (#{row.history.traffic_cost}₽)"
-        else
-          span "#{row.campaign.payment_model} (#{row.campaign.traffic_cost}₽)"
-        end
-      else
-        span '-'
-      end
+      span "#{row.campaign.payment_model} (#{row.campaign.traffic_cost}₽)"
+
     end
     column :clicks
     column :actives
@@ -164,16 +155,15 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
     def scoped_collection
       Click.left_outer_joins(:conversions, :campaign)
           .select(
-              'campaigns.parent_id as history_id',
               'sum(case when clicks.amount > 0 then 1 else 0 end) clicks',
               'sum(case when clicks.activity::int > 0 then 1 else 0 end) actives',
               'sum(case when clicks.amount > 0 then clicks.amount else 0 end) hits',
               'sum(case when conversions.status = 0 then 1 else 0 end) wait',
               'sum(case when conversions.status = 1 then 1 else 0 end) approve',
               'sum(case when conversions.status = 2 then 1 else 0 end) decline',
-              'sum(case when conversions.status = 0 then conversions.ext_payout::int else 0 end) money_wait',
-              'sum(case when conversions.status = 1 then conversions.ext_payout::int else 0 end) money_approve',
-              'sum(case when conversions.status = 2 then conversions.ext_payout::int else 0 end) money_decline'
+              'sum(case when conversions.status = 0 then campaigns.lead_cost::int else 0 end) money_wait',
+              'sum(case when conversions.status = 1 then campaigns.lead_cost::int else 0 end) money_approve',
+              'sum(case when conversions.status = 2 then campaigns.lead_cost::int else 0 end) money_decline'
           )
     end
   end
