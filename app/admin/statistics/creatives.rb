@@ -1,10 +1,10 @@
-ActiveAdmin.register Click, as: 'StatisticsForCampaignsCreatives' do
-  includes :campaign
-  menu parent: "Statistics", label: 'Campaigns Creatives'
+ActiveAdmin.register Click, as: 'StatisticsForCreatives' do
+  includes :campaign, :creative
+  menu parent: "Statistics", label: 'Creatives'
   actions :index
   scope 'All', default: true do |scope|
-    scope.group('clicks.campaign_id').group('clicks.working_campaign_id').group('clicks.creative_id')
-        .reorder('clicks.campaign_id ASC, clicks.working_campaign_id ASC')
+    scope.group('clicks.id, clicks.creative_id, clicks.working_campaign_id, clicks.campaign_id')
+        # .reorder('clicks.campaign_id ASC, clicks.working_campaign_id ASC')
   end
   # scope 's3' do |scope|
   #   scope.select('s3').group('clicks.s3').reorder('s3')
@@ -36,15 +36,17 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaignsCreatives' do
   # end
 
 
-  before_filter :only => [:index] do
-    if params['working_campaign_id'].blank? and (not params['q'] or params['q']['working_campaign_id_eq'].blank?)
-      params['q'] = {'working_campaign_id_eq' => Campaign.where('campaigns.parent_id IS NULL')&.last&.id || ''}
-    end
-  end
-
-  filter :working_campaign, :collection => Campaign.where('campaigns.parent_id IS NULL').map { |o| [o.name, o.id] }, :include_blank => false
-  filter :created_at
-
+  # before_filter :only => [:index] do
+  #   if params['working_campaign_id'].blank? and (not params['q'] or params['q']['working_campaign_id_eq'].blank?)
+  #     params['q'] = {'working_campaign_id_eq' => Campaign.where('campaigns.parent_id IS NULL')&.last&.id || ''}
+  #   end
+  # end
+  #
+  # filter :working_campaign, :collection => Campaign.where('campaigns.parent_id IS NULL').map { |o| [o.name, o.id] }, :include_blank => false
+  # filter :created_at
+  preserve_default_filters!
+  remove_filter :working_campaign
+  filter :campaign, :collection => Campaign.all.map { |o| [("#{o.id} #{o.name}"), o.id] }, :include_blank => false
 
   index :row_class => -> record { 'index_table_working_campaigns' if record.working_campaign_id == record.campaign_id } do
     column 'Creative' do |row|
@@ -73,7 +75,49 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaignsCreatives' do
     end
     column 'CTR' do |row|
       if (row.campaign_creative&.views).to_i > 0
-        span (row.clicks.to_f / row.campaign_creative&.views&.to_f).round(3).to_s + '%'
+        span (row.clicks.to_f / (row.campaign_creative&.views).to_f).round(3).to_s + '%'
+      else
+        span '-'
+      end
+    end
+    column 'EPC/R/C' do |row|
+      if row.clicks > 0
+        all = row.money_approve.to_f + row.money_wait.to_f
+        span (all.to_f / row.clicks.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
+      span '/'
+      if row.clicks > 0
+        span (row.money_approve.to_f / row.clicks.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
+      span '/'
+      if row.clicks > 0 and row.campaign and row.campaign.payment_model == 'cpc'
+        span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
+            row.clicks.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
+    end
+    column 'EPM/R/C' do |row|
+      if row.campaign.views.to_i > 0
+        all = row.money_approve.to_f + row.money_wait.to_f
+        span (all.to_f / row.campaign.views.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
+      span '/'
+      if row.campaign.views > 0
+        span (row.money_approve.to_f / row.campaign.views.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
+      span '/'
+      if row.campaign_id and row.campaign.views > 0 and row.campaign.payment_model == 'cpm'
+        cost = (row.campaign.views.to_f/1000).to_f * row.campaign.traffic_cost.to_f
+        span ((row.money_approve.to_f - cost).round(2)).to_s + '₽'
       else
         span '-'
       end
@@ -115,9 +159,9 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaignsCreatives' do
 
   controller do
     def scoped_collection
-      Click.left_outer_joins(:conversions, :campaign, :creative)
+      Click.left_outer_joins(:conversions, :campaign)
           .select(
-              'clicks.campaign_id, clicks.working_campaign_id, clicks.creative_id',
+              'clicks.creative_id, clicks.working_campaign_id, clicks.campaign_id',
               'sum(case when clicks.amount > 0 then 1 else 0 end) clicks',
               'sum(case when clicks.activity::int > 0 then 1 else 0 end) actives',
               'sum(case when clicks.amount > 0 then clicks.amount else 0 end) hits',

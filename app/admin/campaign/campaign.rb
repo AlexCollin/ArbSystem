@@ -188,9 +188,9 @@ ActiveAdmin.register Campaign do
           approve = s.conversions.approved.count
           wait = s.conversions.waiting.count
           decline = s.conversions.declined.count
-          money_approve = (approve * s.lead_cost).to_i
-          money_wait = (wait * s.lead_cost).to_i
-          money_decline = (decline * s.lead_cost).to_i
+          money_approve = (s.conversions.approved.sum(:payout)).to_i
+          money_wait = (s.conversions.waiting.sum(:payout)).to_i
+          money_decline = (s.conversions.declined.sum(:payout)).to_i
           # raw table_for_campaign(s, clicks, s.clicks.count('activity'), s.clicks.sum('amount'),
           #                        views, s.traffic_cost, false, approve, decline, wait, money_wait,
           #                        money_approve, money_decline)
@@ -299,9 +299,9 @@ ActiveAdmin.register Campaign do
                 'sum(case when conversions.status = 0 AND conversions.click_id = clicks.id then 1 else 0 end) conversions_wait',
                 'sum(case when conversions.status = 1 AND conversions.click_id = clicks.id then 1 else 0 end) conversions_approve',
                 'sum(case when conversions.status = 2 AND conversions.click_id = clicks.id then 1 else 0 end) conversions_decline',
-                'sum(case when conversions.status = 0 AND conversions.click_id = clicks.id then campaigns.lead_cost else 0 end) conversions_money_wait',
-                'sum(case when conversions.status = 1 AND conversions.click_id = clicks.id then campaigns.lead_cost else 0 end) conversions_money_approve',
-                'sum(case when conversions.status = 2 AND conversions.click_id = clicks.id then campaigns.lead_cost else 0 end) conversions_money_decline'
+                'sum(case when conversions.status = 0 AND conversions.click_id = clicks.id then conversions.payout::int else 0 end) conversions_money_wait',
+                'sum(case when conversions.status = 1 AND conversions.click_id = clicks.id then conversions.payout::int else 0 end) conversions_money_approve',
+                'sum(case when conversions.status = 2 AND conversions.click_id = clicks.id then conversions.payout::int else 0 end) conversions_money_decline'
             ).where("campaigns.id = #{s.id} OR campaigns.parent_id = #{s.id}")
                          .group('campaigns.parent_id').group('campaigns.id')
                          .reorder('(CASE WHEN campaigns.parent_id is NULL THEN campaigns.parent_id END) ASC,

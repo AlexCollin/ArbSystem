@@ -14,6 +14,10 @@ class Tracker::ConversionController < Tracker::TrackerController
       @conversion.client_phone = params[:phone]
       @conversion.client_address = params[:address]
       @conversion.client_comment = params[:comment]
+      @conversion.payout = params[:payout] if params[:payout]
+      unless @conversion.payout
+        @conversion.payout = (click_model.campaign.lead_cost).to_f
+      end
       @conversion.extra = params[:extra]
       @conversion.status = 0
       if params[:approve]

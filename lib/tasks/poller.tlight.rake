@@ -21,10 +21,11 @@ namespace :poller do
               elsif lead['status_code'] == -10
                 status = 2
               end
-              Conversion.update(lead['id2'],{
+              Conversion.update(lead['id2'], {
                   :status => status,
                   :ext_comment => lead['comment'],
-                  :ext_payout=>lead['fee']
+                  :ext_payout => lead['fee'],
+                  :payout => lead['fee'].to_f
               })
               p "Conversion #{lead['id2']} updated status to #{status}"
             end
