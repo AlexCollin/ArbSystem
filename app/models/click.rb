@@ -16,4 +16,8 @@ class Click < ApplicationRecord
   def is_working_campaign
     self.working_campaign_id == self.campaign_id
   end
+
+  def campaign_creative
+    CampaignsCreative.where(:creative_id => self.creative_id, :campaign_id => self.campaign_id).first
+  end
 end

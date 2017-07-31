@@ -4,14 +4,10 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
 
 
   menu parent: "Statistics", label: 'Campaigns'
-  scope 'Coefficients', default: true do |scope|
-    scope.select('clicks.campaign_id, clicks.working_campaign_id')
-        .group('clicks.campaign_id').group('clicks.working_campaign_id')
-        .reorder('clicks.campaign_id ASC, clicks.working_campaign_id ASC')
+  scope 'All', default: true do |scope|
+    scope.group('clicks.campaign_id').group('clicks.working_campaign_id')
+               .reorder('clicks.campaign_id ASC, clicks.working_campaign_id ASC')
   end
-  # scope 's2' do |scope|
-  #   scope.select('s2').group('clicks.s2').reorder('s2')
-  # end
   # scope 's3' do |scope|
   #   scope.select('s3').group('clicks.s3').reorder('s3')
   # end
@@ -50,11 +46,7 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
   filter :created_at
 
   index :row_class => -> record { 'index_table_working_campaigns' if record.working_campaign_id == record.campaign_id } do
-    # scope = params[:scope]
-    # unless scope
-    #   scope = 'All'
-    # end
-    # column scope
+    scope = params[:scope]
     column :campaign do |row|
       unless row.is_working_campaign
         link_to "(#{row.campaign_id})-> #{row.campaign.created_at.strftime('%d.%m.%y')}", admin_campaign_path(row.campaign_id)
@@ -138,23 +130,29 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
         span 0.to_s + '%'
       end
     end
-    column 'Leads (W/A/D)' do |row|
+    column 'Leads' do |row|
       span row.wait.to_s + ' /', style: 'color: blue'
       span row.approve.to_s + ' /', style: 'color: green'
       span row.decline.to_s, style: 'color: red'
+      div do
+        span row.money_wait.to_s + ' /', style: 'color: blue'
+        span row.money_approve.to_s + ' /', style: 'color: green'
+        span row.money_decline.to_s, style: 'color: red'
+        span '₽'
+      end
     end
-    column 'Money (W/A/D)' do |row|
-      span row.money_wait.to_s + ' /', style: 'color: blue'
-      span row.money_approve.to_s + ' /', style: 'color: green'
-      span row.money_decline.to_s, style: 'color: red'
-      span '₽'
-    end
+
+    # unless scope
+    #   scope = 'All'
+    # end
+    # column scope
   end
 
   controller do
     def scoped_collection
       Click.left_outer_joins(:conversions, :campaign)
           .select(
+              'clicks.campaign_id, clicks.working_campaign_id',
               'sum(case when clicks.amount > 0 then 1 else 0 end) clicks',
               'sum(case when clicks.activity::int > 0 then 1 else 0 end) actives',
               'sum(case when clicks.amount > 0 then clicks.amount else 0 end) hits',

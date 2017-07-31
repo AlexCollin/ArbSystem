@@ -5,7 +5,7 @@ ActiveAdmin.register Campaign do
                 :integration_offer, :calculate_views_on_creatives, :total_views, creative_ids: [],
                 campaigns_creatives_attributes: [:creative_id, :views, :total_views, :id, :_destroy]
 
-  scope 'Parents', default: true do |scope|
+  scope 'Workings', default: true do |scope|
     scope.where(:parent_id => nil)
   end
   scope 'With Histories', default: true do |scope|
@@ -159,6 +159,7 @@ ActiveAdmin.register Campaign do
         end
         panel 'Creatives' do
           table_for s.campaigns_creatives do
+            column :id
             column :title do |row|
               span row.creative.title
             end
@@ -197,13 +198,11 @@ ActiveAdmin.register Campaign do
             column 'Name' do
               link_to s.name, admin_campaign_path(s.id)
             end
-            column 'Clicks' do
+            column 'Clicks/Acive/Hits' do
               clicks
-            end
-            column 'Actives' do
+              span '/'
               s.clicks.count('activity')
-            end
-            column 'Hits' do
+              span '/'
               s.clicks.sum('amount')
             end
             column 'Views' do
@@ -318,13 +317,11 @@ ActiveAdmin.register Campaign do
               column 'Model' do |row|
                 span "#{row.payment_model} (#{row.traffic_cost}₽)"
               end
-              column 'Clicks' do |row|
+              column 'Clicks/Active/Hits' do |row|
                 span row.clicks_count
-              end
-              column 'Actives' do |row|
+                span '/'
                 span row.actives_count
-              end
-              column 'Hits' do |row|
+                span '/'
                 span row.hits_count
               end
               column 'Views' do |row|
