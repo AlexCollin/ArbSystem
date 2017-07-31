@@ -2,16 +2,10 @@ class Tracker::ClickController < Tracker::TrackerController
 
   def create
     visitor = Visitor::get(params[:ip], params[:ua])
-    hit_ident = visitor.to_s
-    p 1111
-    p hit_ident
+    hit_ident = visitor.to_s + params[:landing]
     hit = $hits_cache.get(hit_ident)
     if hit
-      click = Click.find(hit.to_i)
-      click.amount += 1
-      click.updated_at = Time.now
-      click.save
-      render json: click
+      render json: Click.find(hit.to_i).increment!(:amount, 1)
     else
       click = Click.new
       click.visitor_id = visitor
@@ -32,8 +26,37 @@ class Tracker::ClickController < Tracker::TrackerController
       click.s7 = params[:s7] if params[:s7]
       click.s8 = params[:s8] if params[:s8]
       click.s9 = params[:s9] if params[:s9]
-      click.campaign_id = params[:campaign].to_i if params[:campaign].to_i
-      click.creative_id = params[:creative].to_i if params[:creative].to_i
+      if params[:campaign].to_i > 0
+        click.campaign_id = params[:campaign].to_i
+        if params[:creative].to_i > 0
+          click.creative_id = params[:creative].to_i
+        end
+      else
+        if params[:utm_campaign].to_i > 0
+          source = Source.where(:code => params[:utm_source]).first
+          if source
+            campaign = Campaign.where(source_id: source.id, :ext_id => params[:utm_campaign], :parent_id => nil).first
+            if campaign
+              click.campaign_id = campaign.id
+              if params[:utm_content].to_i > 0
+                creative = CampaignsCreative.where(:campaign_id => campaign.id, :ext_id => params[:utm_content]).first
+                if creative
+                  click.creative_id = creative.creative_id
+                else
+                  Issue.create!(:name => 'Creative not found', :data => params.to_s, :type => 'click')
+                  render json: {status: 'error', message: 'Creative not found'}
+                end
+              end
+            else
+              Issue.create!(:name => 'Campaign not found', :data => params.to_s, :type => 'click')
+              render json: {status: 'error', message: 'Campaign not found'}
+            end
+          else
+            Issue.create!(:name => 'Source not found', :data => params.to_s, :type => 'click')
+            render json: {status: 'error', message: 'Source not found'}
+          end
+        end
+      end
       if click.save
         $hits_cache.set(hit_ident, click.id, {ex: 1.day})
         render json: click

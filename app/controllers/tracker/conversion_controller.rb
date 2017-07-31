@@ -1,7 +1,7 @@
 class Tracker::ConversionController < Tracker::TrackerController
   def create
     visitor = Visitor::get(params[:ip], params[:ua])
-    hit_ident = visitor.to_s
+    hit_ident = visitor.to_s + params[:landing]
     hit = $hits_cache.get(hit_ident)
     @conversion = Conversion.new
     @conversion.visitor_id = visitor
@@ -30,6 +30,9 @@ class Tracker::ConversionController < Tracker::TrackerController
       else
         render json: @conversion.errors
       end
+    else
+      Issue.create!(:name => 'Click not found', :data => params.to_s, :type => 'conversion')
+      render json: {status: 'error', message: 'Click not found'}
     end
   end
 end
