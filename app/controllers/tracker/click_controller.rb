@@ -2,7 +2,7 @@ class Tracker::ClickController < Tracker::TrackerController
 
   def create
     visitor = Visitor::get(params[:ip], params[:ua])
-    hit_ident = visitor.to_s + params[:landing]
+    hit_ident = visitor.to_s + params[:landing].to_s
     hit = $hits_cache.get(hit_ident)
     if hit
       render json: Click.find(hit.to_i).increment!(:amount, 1)
@@ -68,7 +68,7 @@ class Tracker::ClickController < Tracker::TrackerController
 
   def activity
     visitor = Visitor::get(params[:ip], params[:ua])
-    hit_ident = visitor.to_s + params[:ident].to_s
+    hit_ident = visitor.to_s + params[:landing].to_s
     hit = $hits_cache.get(hit_ident)
     if hit
       click = Click.find(hit.to_i)

@@ -2,8 +2,8 @@ ActiveAdmin.register Campaign do
   includes :clicks, :conversions
   permit_params :name, :description, :adv_type, :adv_type, :payment_model, :history_action, :integration,
                 :traffic_cost, :lead_cost, :incremental_views, :offer_id, :source_id, :landing_id, :views,
-                :integration_offer, :calculate_views_on_creatives, :total_views, creative_ids: [],
-                campaigns_creatives_attributes: [:creative_id, :views, :total_views, :id, :_destroy]
+                :integration_offer, :calculate_views_on_creatives, :total_views, :ext_id, creative_ids: [],
+                campaigns_creatives_attributes: [:creative_id, :views, :total_views, :id, :_destroy, :ext_id]
 
   scope 'Workings', default: true do |scope|
     scope.where(:parent_id => nil)
@@ -102,6 +102,7 @@ ActiveAdmin.register Campaign do
     column :payment_model
     column :traffic_cost
     column :lead_cost
+    column :ext_id
     column :views do |row|
       span row.get_views_count_from_history(true)
     end
@@ -153,6 +154,7 @@ ActiveAdmin.register Campaign do
           end
           row :integration
           row :integration_offer
+          row :ext_id
           row :offer
           row :source
           row :landing
@@ -175,6 +177,7 @@ ActiveAdmin.register Campaign do
             column :views do |row|
               span row.views
             end
+            column :ext_id
             column 'Image' do |img|
               image_tag(img.creative.image.url(:thumb))
             end
@@ -183,7 +186,7 @@ ActiveAdmin.register Campaign do
       end
       tab 'Статистика' do
         panel 'General Statistics' do
-          clicks = s.clicks.count
+          clicks = s.all_clicks.count
           views_count = s.get_views_count_from_history(true)
           approve = s.conversions.approved.count
           wait = s.conversions.waiting.count
@@ -198,15 +201,15 @@ ActiveAdmin.register Campaign do
             column 'Name' do
               link_to s.name, admin_campaign_path(s.id)
             end
-            column 'Clicks/Acive/Hits' do
-              clicks
+            column 'Clicks/Active/Hits' do
+              span clicks
               span '/'
-              s.clicks.count('activity')
+              span s.all_clicks.count('activity').to_i
               span '/'
-              s.clicks.sum('amount')
+              span s.all_clicks.sum('amount')
             end
             column 'Views' do
-              views_count
+              span views_count
             end
             column 'CTR' do
               if clicks > 0
@@ -290,10 +293,11 @@ ActiveAdmin.register Campaign do
         end
         unless s.parent_id
           panel 'Splited Statistics' do
-            childs = Campaign.left_outer_joins(:clicks, :conversions).select(
+            childs = Campaign.joins('LEFT OUTER JOIN clicks ON clicks.campaign_id = campaigns.id',
+                                    'LEFT OUTER JOIN conversions ON conversions.click_id = clicks.id').select(
                 'campaigns.id, campaigns.name, campaigns.parent_id, campaigns.created_at',
                 'campaigns.payment_model, campaigns.traffic_cost, campaigns.views, campaigns.total_views',
-                'sum(case when clicks.amount > 0 then 1 else 0 end) clicks_count',
+                'count(clicks) clicks_count',
                 'sum(case when clicks.activity::int > 0 then 1 else 0 end) actives_count',
                 'sum(case when clicks.amount > 0 then clicks.amount else 0 end) hits_count',
                 'sum(case when conversions.status = 0 AND conversions.click_id = clicks.id then 1 else 0 end) conversions_wait',
@@ -302,8 +306,7 @@ ActiveAdmin.register Campaign do
                 'sum(case when conversions.status = 0 AND conversions.click_id = clicks.id then conversions.payout::int else 0 end) conversions_money_wait',
                 'sum(case when conversions.status = 1 AND conversions.click_id = clicks.id then conversions.payout::int else 0 end) conversions_money_approve',
                 'sum(case when conversions.status = 2 AND conversions.click_id = clicks.id then conversions.payout::int else 0 end) conversions_money_decline'
-            ).where("campaigns.id = #{s.id} OR campaigns.parent_id = #{s.id}")
-                         .group('campaigns.parent_id').group('campaigns.id')
+            ).group('campaigns.id')
                          .reorder('(CASE WHEN campaigns.parent_id is NULL THEN campaigns.parent_id END) ASC,
         CASE WHEN campaigns.parent_id IS NOT NULL THEN campaigns.id END DESC')
             table_for childs, :row_class => -> record { 'index_table_working_campaigns' unless record.parent_id } do
@@ -445,6 +448,7 @@ ActiveAdmin.register Campaign do
         f.inputs do
           f.input :integration, as: :select, :collection => {'Tligth' => 'tlight'}, include_blank: true, allow_blank: true
           f.input :integration_offer
+          f.input :ext_id
         end
       end
       tab 'Креативы' do
@@ -458,6 +462,7 @@ ActiveAdmin.register Campaign do
             cf.input :id, as: :hidden
             cf.input :creative_id, as: :select, :collection => Creative.all.map { |o| [o.title, o.id] }, :include_blank => true
             cf.input :views, :input_html => {:value => cf.object.get_total_views(true)}
+            cf.input :ext_id
           end
         end
       end

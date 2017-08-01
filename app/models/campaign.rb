@@ -32,6 +32,10 @@ class Campaign < ApplicationRecord
     self.name
   end
 
+  def all_clicks
+    Click.where("clicks.campaign_id = #{self.id} OR clicks.working_campaign_id = #{self.id}").all
+  end
+
   def money(payout)
     def waiting(payout)
       conversions.waiting.count * payout

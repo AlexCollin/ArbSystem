@@ -20,4 +20,7 @@ class Click < ApplicationRecord
   def campaign_creative
     CampaignsCreative.where(:creative_id => self.creative_id, :campaign_id => self.campaign_id).first
   end
+  def creatives_views
+    CampaignsCreative.where(:creative_id => self.creative_id).sum(:views)
+  end
 end

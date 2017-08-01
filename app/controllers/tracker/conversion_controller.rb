@@ -1,7 +1,7 @@
 class Tracker::ConversionController < Tracker::TrackerController
   def create
     visitor = Visitor::get(params[:ip], params[:ua])
-    hit_ident = visitor.to_s + params[:landing]
+    hit_ident = visitor.to_s + params[:landing].to_s
     hit = $hits_cache.get(hit_ident)
     @conversion = Conversion.new
     @conversion.visitor_id = visitor

@@ -78,6 +78,48 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaignsCreatives' do
         span '-'
       end
     end
+    column 'EPC/R/C' do |row|
+      if row.clicks > 0
+        all = row.money_approve.to_f + row.money_wait.to_f
+        span (all.to_f / row.clicks.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
+      span '/'
+      if row.clicks > 0
+        span (row.money_approve.to_f / row.clicks.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
+      span '/'
+      if row.clicks > 0 and row.campaign and row.campaign.payment_model == 'cpc'
+        span ((row.money_approve.to_f - (row.clicks.to_f * row.campaign.traffic_cost.to_f)) /
+            row.clicks.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
+    end
+    column 'EPM/R/C' do |row|
+      if row.campaign.views.to_i > 0
+        all = row.money_approve.to_f + row.money_wait.to_f
+        span (all.to_f / row.campaign.views.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
+      span '/'
+      if row.campaign.views > 0
+        span (row.money_approve.to_f / row.campaign.views.to_f).round(2).to_s + '₽'
+      else
+        span '-'
+      end
+      span '/'
+      if row.campaign_id and row.campaign.views > 0 and row.campaign.payment_model == 'cpm'
+        cost = (row.campaign.views.to_f/1000).to_f * row.campaign.traffic_cost.to_f
+        span ((row.money_approve.to_f - cost).round(2)).to_s + '₽'
+      else
+        span '-'
+      end
+    end
     column 'Leads' do |row|
       span row.wait.to_s + ' /', style: 'color: blue'
       span row.approve.to_s + ' /', style: 'color: green'
