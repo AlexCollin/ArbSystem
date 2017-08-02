@@ -1,12 +1,9 @@
 class Tracker::ConversionController < Tracker::TrackerController
   def create
-    visitor = Visitor::get(params[:ip], params[:ua])
-    hit_ident = visitor.to_s + params[:landing].to_s
-    hit = $hits_cache.get(hit_ident)
-    @conversion = Conversion.new
-    @conversion.visitor_id = visitor
-    if hit
-      click_model = Click.find(hit.to_i)
+    click_model = Click.find(params[:click])
+    if click_model
+      @conversion = Conversion.new
+      @conversion.visitor_id = click_model.visitor_id
       @conversion.click_id = click_model.id
       @conversion.campaign_id = click_model.campaign_id
       @conversion.creative_id = click_model.creative_id

@@ -297,16 +297,17 @@ ActiveAdmin.register Campaign do
                                     'LEFT OUTER JOIN conversions ON conversions.click_id = clicks.id').select(
                 'campaigns.id, campaigns.name, campaigns.parent_id, campaigns.created_at',
                 'campaigns.payment_model, campaigns.traffic_cost, campaigns.views, campaigns.total_views',
-                'count(clicks) clicks_count',
+                'sum(CASE WHEN clicks.amount > 0 AND conversions.id IS NULL THEN 1 ELSE 0 END) clicks_count',
                 'sum(case when clicks.activity::int > 0 then 1 else 0 end) actives_count',
                 'sum(case when clicks.amount > 0 then clicks.amount else 0 end) hits_count',
+                'sum(case when conversions.click_id = clicks.id then 1 else 0 end) conversions_all',
                 'sum(case when conversions.status = 0 AND conversions.click_id = clicks.id then 1 else 0 end) conversions_wait',
                 'sum(case when conversions.status = 1 AND conversions.click_id = clicks.id then 1 else 0 end) conversions_approve',
                 'sum(case when conversions.status = 2 AND conversions.click_id = clicks.id then 1 else 0 end) conversions_decline',
                 'sum(case when conversions.status = 0 AND conversions.click_id = clicks.id then conversions.payout::int else 0 end) conversions_money_wait',
                 'sum(case when conversions.status = 1 AND conversions.click_id = clicks.id then conversions.payout::int else 0 end) conversions_money_approve',
                 'sum(case when conversions.status = 2 AND conversions.click_id = clicks.id then conversions.payout::int else 0 end) conversions_money_decline'
-            ).group('campaigns.id')
+            ).group('campaigns.id').where('conversions.id IS NULL OR clicks.id IS NOT NULL')
                          .reorder('(CASE WHEN campaigns.parent_id is NULL THEN campaigns.parent_id END) ASC,
         CASE WHEN campaigns.parent_id IS NOT NULL THEN campaigns.id END DESC')
             table_for childs, :row_class => -> record { 'index_table_working_campaigns' unless record.parent_id } do
