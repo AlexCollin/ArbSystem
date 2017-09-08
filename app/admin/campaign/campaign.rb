@@ -447,7 +447,9 @@ ActiveAdmin.register Campaign do
       end
       tab 'Интеграция' do
         f.inputs do
-          f.input :integration, as: :select, :collection => {'Tligth' => 'tlight'}, include_blank: true, allow_blank: true
+          f.input :integration, as: :select, :collection => {
+              'Tligth' => 'tlight', 'M1 Shop' => 'm1shop'
+          }, include_blank: true, allow_blank: true
           f.input :integration_offer
           f.input :ext_id
         end

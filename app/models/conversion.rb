@@ -21,8 +21,11 @@ class Conversion < ApplicationRecord
   def send_postback
     if self.status == 0
       unless self.ext_id
-        if self.campaign.integration == 'tlight'
-          Postbacks::TLightJob.perform_now(:conversion => self, :offer_id => self.campaign.integration_offer.to_i) #512
+        case self.campaign.integration
+          when 'tlight'
+            Postbacks::TLightJob.perform_now(:conversion => self, :offer_id => self.campaign.integration_offer.to_i) #512
+          when 'm1shop'
+            Postbacks::M1ShopJob.perform_now(:conversion => self, :offer_id => self.campaign.integration_offer.to_i)
         end
       end
     end
