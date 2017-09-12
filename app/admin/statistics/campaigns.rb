@@ -160,8 +160,8 @@ ActiveAdmin.register Click, as: 'StatisticsForCampaigns' do
               'sum(case when conversions.status = 1 then 1 else 0 end) approve',
               'sum(case when conversions.status = 2 then 1 else 0 end) decline',
               'sum(case when conversions.status = 0 then conversions.payout::int else 0 end) money_wait',
-              'sum(case when conversions.status = 1 then conversions.lead_cost::int else 0 end) money_approve',
-              'sum(case when conversions.status = 2 then conversions.lead_cost::int else 0 end) money_decline'
+              'sum(case when conversions.status = 1 then conversions.payout::int else 0 end) money_approve',
+              'sum(case when conversions.status = 2 then conversions.payout::int else 0 end) money_decline'
           )
     end
   end
