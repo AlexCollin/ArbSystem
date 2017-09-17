@@ -38,7 +38,7 @@ namespace :poller do
               if lead['trash'].to_i == 1
                 status = 2
               end
-              Conversion.includes(:campaign).where("conversions.ext_id = #{lead['external_id']} AND campaigns.integration = 'm1shop'").update_all({
+              Conversion.includes(:campaign).where("conversions.ext_id = '#{lead['m1_id'].to_i}' AND campaigns.integration = 'm1shop'").update_all({
                   :status => status,
                   :ext_comment => "#{lead['comment']} #{lead['callcenter_comment']}"
               })
