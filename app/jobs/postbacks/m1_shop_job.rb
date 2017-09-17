@@ -8,7 +8,7 @@ class Postbacks::M1ShopJob < ApplicationJob
     params = {
         :ref => 80853,
         :api_key => 'b76aa5c68ce484d021cdb6ee314bccda',
-        :id => conversion.id,
+        :external_id => conversion.id,
         :product_id => args[0][:offer_id],
         :name => conversion.client_name,
         :phone => conversion.client_phone,
