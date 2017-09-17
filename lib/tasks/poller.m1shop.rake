@@ -7,9 +7,9 @@ namespace :poller do
     Conversion.where('status = 0').all.each do |conversion|
       if conversion.campaign.integration == 'm1shop'
         if i == 0
-          query_string += '&id=' + conversion.id.to_s
+          query_string += '&id=' + conversion.ext_id.to_s
         else
-          query_string += ',' + conversion.id.to_s
+          query_string += ',' + conversion.ext_id.to_s
         end
         i += 1
       end
