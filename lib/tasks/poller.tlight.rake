@@ -4,7 +4,9 @@ namespace :poller do
   task tlight: :environment do
     query_string = ''
     Conversion.where('status = 0').all.each do |conversion|
-      query_string += '&id2=' + conversion.id.to_s
+      if conversion.campaign.integration == 'tlight'
+        query_string += '&id2=' + conversion.id.to_s
+      end
     end
     if query_string.size > 0
       query_string = 'http://cpa.tlight.biz/api/lead/feed?key=dPimhuccBmkrCb6zrz3YVy3zixA1BOlKrmtY5' + query_string

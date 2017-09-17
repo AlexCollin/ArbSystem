@@ -5,12 +5,14 @@ namespace :poller do
     query_string = ''
     i = 0
     Conversion.where('status = 0').all.each do |conversion|
-      if i == 0
-        query_string += '&id=' + conversion.id.to_s
-      else
-        query_string += ',' + conversion.id.to_s
+      if conversion.campaign.integration == 'm1shop'
+        if i == 0
+          query_string += '&id=' + conversion.id.to_s
+        else
+          query_string += ',' + conversion.id.to_s
+        end
+        i += 1
       end
-      i += 1
     end
     if query_string.size > 0
       query_string = 'https://m1-shop.ru/get_order_status/?ref=80853&api_key=b76aa5c68ce484d021cdb6ee314bccda' + query_string
