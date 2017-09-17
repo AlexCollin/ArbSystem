@@ -19,6 +19,7 @@ namespace :poller do
       response = Net::HTTP.get(URI.parse(query_string))
       if response
         res_json = JSON.parse(response)
+        p res_json
         leads = res_json['result']
         if leads.size > 0
           leads.each do |lead|
