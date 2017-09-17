@@ -1,7 +1,7 @@
 require 'net/http'
 require 'uri'
 namespace :poller do
-  task tlight: :environment do
+  task m1shop: :environment do
     query_string = ''
     i = 0
     Conversion.where('status = 0').all.each do |conversion|
