@@ -38,7 +38,7 @@ namespace :poller do
               if lead['trash'].to_i == 1
                 status = 2
               end
-              Conversion.update(lead['extenal_id'], {
+              Conversion.update("ext_id = #{lead['m1_id']}", {
                   :status => status,
                   :ext_comment => "#{lead['comment']} #{lead['callcenter_comment']}"
               })
